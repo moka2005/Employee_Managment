@@ -1,3 +1,4 @@
+
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
@@ -29,14 +30,16 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 public class WelcomePage {
+
     static JFrame frame2;
     static JPanel frame;
-    static int  id ;  
+    static int id;
     static CardLayout cardLayout;
     static JPanel cardPanel;
-    WelcomePage(int x,int y,int id) {
-        
-        
+    
+
+    WelcomePage(int x, int y, int id) {
+
         cardLayout = new CardLayout();
         cardPanel = new JPanel(cardLayout);
         //Login2.frame.dispose();
@@ -46,59 +49,58 @@ public class WelcomePage {
         frame2.setSize(x, y);
         frame.setLayout(new BorderLayout());
         frame2.setLocationRelativeTo(null);
-        creat_interfceGraphice(x,y);
+        creat_interfceGraphice(x, y);
         frame2.add(cardPanel);
         frame2.setVisible(true);
-        
-        count c = new count(cardLayout,cardPanel);
-        Employee e = new Employee(cardLayout,cardPanel);
-        //Employee e = new Employee(cardLayout,cardPanel);
-        
+
+        count a = new count(cardLayout, cardPanel);
+        Employee b = new Employee(cardLayout, cardPanel);
+        Absence c = new Absence(cardLayout, cardPanel);
+                           
+
         cardPanel.add(frame, "page1");
-        cardPanel.add(c.frame, "page2");
-        cardPanel.add(e.frame, "page3");
+        cardPanel.add(a.frame, "page2");
+        cardPanel.add(b.frame, "page3");
+        cardPanel.add(c.frame, "page4");
         
+
         cardLayout.show(cardPanel, "page1");
-         
+
     }
-    
-  
-    public static void creat_interfceGraphice(int x , int y)
-    {
-            // Auter de Frere Mammeri
+
+    public static void creat_interfceGraphice(int x, int y) {
+        // Auter de Frere Mammeri
 
         JPanel gg = new JPanel();
         gg.setLayout(new BorderLayout());
         gg.setBackground(Color.ORANGE);
-        gg.setPreferredSize(new Dimension(x,55));
+        gg.setPreferredSize(new Dimension(x, 55));
 
         JPanel p1 = new JPanel();
         p1.setLayout(new BorderLayout());
-        p1.setPreferredSize(new Dimension(x,50));
+        p1.setPreferredSize(new Dimension(x, 50));
         p1.setBackground(Color.RED);
-       
 
         JLabel l = new JLabel("SYSYEM D'INFORMATION");
         l.setHorizontalAlignment(SwingConstants.CENTER);
         l.setVerticalAlignment(SwingConstants.CENTER);
 
-        Font f = new Font( "Times New Roman", Font.BOLD, 25);
+        Font f = new Font("Times New Roman", Font.BOLD, 25);
         l.setFont(f);
-         // Southe of Frame that is whit
-        JPanel n= new JPanel();
+        // Southe of Frame that is whit
+        JPanel n = new JPanel();
         n.setLayout(new BorderLayout());
-        n.setPreferredSize(new Dimension(x,5));
+        n.setPreferredSize(new Dimension(x, 5));
         n.setBackground(Color.ORANGE);
-        
-         
 
         // Center of Frame
         JPanel c = new JPanel();
         c.setLayout(new BorderLayout());
         c.setBackground(Color.LIGHT_GRAY);
-        
+
         JPanel imagePanel = new JPanel() {
             Image img = new ImageIcon("/home/mokhtar-mammeri/Desktop/BME2/src/Logo3.jpeg").getImage();
+
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -108,51 +110,44 @@ public class WelcomePage {
         c.add(imagePanel, BorderLayout.CENTER);
         // WEST of Frame
         JPanel cc = new JPanel();
-        cc.setPreferredSize(new Dimension(5,y));
+        cc.setPreferredSize(new Dimension(5, y));
         cc.setBackground(Color.ORANGE);
-       
-        
-        
-        JPanel v = new JPanel();    
+
+        JPanel v = new JPanel();
         v.setLayout(new BorderLayout());
-        v.setPreferredSize(new Dimension(205,y));
+        v.setPreferredSize(new Dimension(275, y));
         v.setBackground(Color.ORANGE);
 
         JPanel k = new JPanel();
-        k.setPreferredSize(new Dimension(5,y));
+        k.setPreferredSize(new Dimension(5, y));
         k.setBackground(Color.ORANGE);
-        
-        
+
         // Button in the west
         JPanel g = new JPanel();
         g.setLayout(new BorderLayout());
-        
+
         JPanel Buttons = new JPanel();
-        Buttons.setLayout(new GridLayout(5,1,10,2));
+        Buttons.setLayout(new GridLayout(5, 1, 10, 2));
         Buttons.setBackground(Color.RED);
-        
-        g.setPreferredSize(new Dimension(200,y));
-       // g.setBackground(Color.GREEN);
-        
-        g.add(k,BorderLayout.EAST);
-        v.add(g,BorderLayout.EAST);
-        frame.add(v,BorderLayout.EAST);
-        g.add(Buttons,BorderLayout.CENTER);
+
+        g.setPreferredSize(new Dimension(270, y));
+        // g.setBackground(Color.GREEN);
+
+        g.add(k, BorderLayout.EAST);
+        v.add(g, BorderLayout.EAST);
+        frame.add(v, BorderLayout.EAST);
+        g.add(Buttons, BorderLayout.CENTER);
 
         // ADD compennts to frame
-        frame.add(cc,BorderLayout.WEST);
-        frame.add(c,BorderLayout.CENTER);
-        frame.add(n,BorderLayout.SOUTH);
-        
+        frame.add(cc, BorderLayout.WEST);
+        frame.add(c, BorderLayout.CENTER);
+        frame.add(n, BorderLayout.SOUTH);
 
-        p1.add(l,BorderLayout.CENTER);
-        gg.add(p1,BorderLayout.NORTH);
-        frame.add(gg,BorderLayout.NORTH);
-                 
+        p1.add(l, BorderLayout.CENTER);
+        gg.add(p1, BorderLayout.NORTH);
+        frame.add(gg, BorderLayout.NORTH);
 
-  
-
-       /* Vector myb=new Vector();
+        /* Vector myb=new Vector();
 
         //--------------------
         try {
@@ -175,127 +170,121 @@ public class WelcomePage {
                 e2.printStackTrace();
             }
         //--------------------*/
-                  
-        
-                
         creat_Button(y, Buttons);
         creat_menuBar();
-        
+
     }
-      public static void creat_menuBar()
-    {
+
+    public static void creat_menuBar() {
         JMenuBar menuBar = new JMenuBar();
         menuBar.setBackground(Color.WHITE);
-        
-        String[] menu= { "المساعدة", "الإعدادات", "الحسابات", "السجلات", "معلومات", "الإضافات" };
-        JMenu menu_arr [] = new JMenu [6];
+
+        String[] menu = {"المساعدة", "الإعدادات", "الحسابات", "السجلات", "معلومات", "الإضافات"};
+        JMenu menu_arr[] = new JMenu[6];
         menuBar.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         menuBar.setBackground(Color.WHITE); // خلفية خفيفة
         menuBar.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
         menuBar.setPreferredSize(new Dimension(frame.getWidth(), 25));
-        for(int i =0;i<6;i++)
-        {
-           menu_arr[i] = new JMenu(menu[i]);
-           menuBar.add(menu_arr[i]);
+        for (int i = 0; i < 6; i++) {
+            menu_arr[i] = new JMenu(menu[i]);
+            menuBar.add(menu_arr[i]);
         }
         frame2.setJMenuBar(menuBar);
     }
-    public static void creat_Button(int y , JPanel Buttons)
-    {
-        String []s = {"إدارة الحسابات","العمال","جدول الغيابات","g","v"};
+
+    public static void creat_Button(int y, JPanel Buttons) {
+        String[] s = {"إدارة الحسابات", "العمال", "إدخال الغيابات", "متابعة الغيابات", "v"};
         JButton b[] = new JButton[11];
         Font f = new Font("Arial", Font.BOLD, 25);
-        
-        for(int i =0;i<5;i++)
-        {
+
+        for (int i = 0; i < 5; i++) {
             JButton a = new JButton(s[i]);
             a.setFont(f);
             b[i] = a;
             //a.setPreferredSize(new Dimension(150, 10));
             a.setBackground(Color.BLACK);
             a.setForeground(Color.WHITE);
-            a.setBorderPainted(false);
+
             a.setFocusPainted(false);
             Buttons.add(a);
         }
         Actions(b);
-  
+
     }
 
-  /*  public static void main(String[] args) {
+    /*  public static void main(String[] args) {
         new WelcomePage(800,550);
     }*/
     public static void Actions(JButton b[]) {
-    
-       frame2.addWindowListener(new WindowListener() {
-    
+
+        frame2.addWindowListener(new WindowListener() {
+
             @Override
             public void windowClosing(WindowEvent e) {
                 //JOptionPane.showMessageDialog(frame, "Event: Window Closing");
-                 frame2.dispose();
+                frame2.dispose();
 
             }
 
-           @Override
-           public void windowOpened(WindowEvent we) {
-               //throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-           }
+            @Override
+            public void windowOpened(WindowEvent we) {
+                //throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+            }
 
-           @Override
-           public void windowClosed(WindowEvent we) {
-               //throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-               frame2.dispose();
-           }
+            @Override
+            public void windowClosed(WindowEvent we) {
+                //throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+                frame2.dispose();
+            }
 
-           @Override
-           public void windowIconified(WindowEvent we) {
-               //throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-           }
+            @Override
+            public void windowIconified(WindowEvent we) {
+                //throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+            }
 
-           @Override
-           public void windowDeiconified(WindowEvent we) {
-               //throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-           }
+            @Override
+            public void windowDeiconified(WindowEvent we) {
+                //throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+            }
 
-           @Override
-           public void windowActivated(WindowEvent we) {
-               //throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-           }
+            @Override
+            public void windowActivated(WindowEvent we) {
+                //throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+            }
 
-           @Override
-           public void windowDeactivated(WindowEvent we) {
-               //throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-           }
- 
+            @Override
+            public void windowDeactivated(WindowEvent we) {
+                //throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+            }
+
         });
-       
+
         ActionListener ActionListener = new ActionListener() {
-            public void actionPerformed(ActionEvent e )
-            {
-                if(e.getSource()==b[0])
-                {
-                   
-                       cardLayout.show(cardPanel, "page2");
-                    
-                }
-                else
-                {
-                    if(e.getSource()==b[1])
-                    {
+            public void actionPerformed(ActionEvent e) {
+                if (e.getSource() == b[0]) {
+
+                    cardLayout.show(cardPanel, "page2");
+
+                } else {
+                    if (e.getSource() == b[1]) {
                         cardLayout.show(cardPanel, "page3");
-                        
+
+                    } else {
+                        if (e.getSource() == b[2]) {
+                            Absence.update();
+                            cardLayout.show(cardPanel, "page4");
+                        }
                     }
-                }    
-                    
+                }
+
             }
         };
         b[0].addActionListener(ActionListener);
         b[1].addActionListener(ActionListener);
-       
+        b[2].addActionListener(ActionListener);
     }
-    public static void main(String args[])
-    {
-         WelcomePage a = new WelcomePage(1000,700,6);
+
+    public static void main(String args[]) {
+        WelcomePage a = new WelcomePage(1800, 800, 6);
     }
 }
-

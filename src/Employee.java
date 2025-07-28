@@ -18,9 +18,11 @@ import com.toedter.calendar.JDateChooser;
 import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.ComponentOrientation;
+import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Insets;
 import java.awt.RenderingHints;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -61,8 +63,8 @@ class pd extends JPanel {
                 RenderingHints.VALUE_RENDER_QUALITY);
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                 RenderingHints.VALUE_ANTIALIAS_ON);
-        g2d.drawImage(Employee.img, 25, 30, w - 50, h, this);
-        System.out.println(w + "" + h);
+        g2d.drawImage(Employee.img, 25, 30, w - 50, h - 50, this);
+
     }
 
     public void rp() {
@@ -82,15 +84,59 @@ public class Employee {
     static String imagePath = "";
     static Image img;
     static pd profil_icon = new pd();
-
+    static JRadioButton radio_buttom[] = new JRadioButton[3];
+    static ButtonGroup g;
+    
     Employee(CardLayout a, JPanel b) {
         cardLayout = a;
         cardPanel = b;
         frame = new JPanel();
-        frame.setSize(1000, 700);
+        //frame.setSize(1000, 700);
 
         create_interfaceGraphics();
         frame.setVisible(true);
+    }
+
+    public static void Action_radio(JRadioButton b[], ButtonGroup g) {
+
+        try {
+            String selectSQL = "";
+
+            if (b[0].isSelected()) {
+                selectSQL = "SELECT * FROM Employee";
+                System.out.println("hellersoeiru");
+            } else if (b[1].isSelected()) {
+                selectSQL = "SELECT * FROM Employee WHERE activ_emp = '1'";
+            } else if (b[2].isSelected()) {
+                selectSQL = "SELECT * FROM Employee WHERE activ_emp = '0'";
+                System.out.println("hellersoeiru999999999999");
+            } else {
+
+                selectSQL = "SELECT * FROM Employee WHERE activ_emp = '1'";
+            }
+
+            ResultSet rs = DataBaseMangemet.select_Query(selectSQL);
+            model.setRowCount(0);
+            while (rs.next()) {
+                Vector<String> row = new Vector<>();
+                row.add(rs.getString("id_Employee"));
+                row.add(rs.getString("nom"));
+                row.add(rs.getString("prenom"));
+                row.add(rs.getString("date_naissance"));
+                row.add(rs.getString("date_embauche"));
+                row.add(rs.getString("date_depart"));
+                row.add(rs.getString("telephone"));
+                row.add(rs.getString("post"));
+                row.add(rs.getString("salaire"));
+                row.add(rs.getString("etat"));
+                model.addRow(row);
+            }
+
+            DataBaseMangemet.conn.close();
+        } catch (SQLException e2) {
+            System.out.println(e2.getMessage());
+        }
+
     }
 
     public void create_interfaceGraphics() {
@@ -136,8 +182,6 @@ public class Employee {
         JPanel south2 = new JPanel();
         south2.setLayout(new BoxLayout(south2, BoxLayout.Y_AXIS));
         west.add(south2, BorderLayout.SOUTH);
-        
-     
 
         west.setPreferredSize(new Dimension(300, 0));
         west.setBackground(Color.red);
@@ -223,34 +267,9 @@ public class Employee {
         inputData(center);
         table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
         for (int i = 0; i < table.getColumnCount(); i++) {
-            table.getColumnModel().getColumn(i).setResizable(false); // 🔒 إغلاق التغيير اليدوي
+            table.getColumnModel().getColumn(i).setResizable(false);
         }
         table.getTableHeader().setReorderingAllowed(false);
-
-        try {
-            String selectSQL = "SELECT * FROM Employee";
-            ResultSet rs = DataBaseMangemet.select_Query(selectSQL);
-
-            // إضافة البيانات إلى الجدول 
-            while (rs.next()) {
-                Vector<String> row = new Vector<>();
-                row.add(rs.getString("id_Employee"));
-                row.add(rs.getString("nom"));
-                row.add(rs.getString("prenom"));
-                row.add(rs.getString("date_naissance"));
-                row.add(rs.getString("date_embauche"));
-                row.add(rs.getString("date_depart"));
-                row.add(rs.getString("telephone"));
-                row.add(rs.getString("post"));
-                row.add(rs.getString("salaire"));
-                row.add(rs.getString("etat"));
-                model.addRow(row);
-            }
-
-            DataBaseMangemet.conn.close();
-        } catch (SQLException e2) {
-            System.out.println(e2.getMessage());
-        }
 
         Font f2 = new Font("Arial", Font.BOLD, 15);
         table.setRowHeight(40);
@@ -289,15 +308,12 @@ public class Employee {
         JPanel p4 = new JPanel();
         JPanel p5 = new JPanel();
         JPanel p6 = new JPanel();
-        JPanel p7 = new JPanel();
+        JPanel p0 = new JPanel();
 
-        p7.setBackground(new Color(10, 61, 98));
-        center.add(p7);
+        p0.setBackground(new Color(10, 61, 98));
+        center.add(p0);
 
         Font f1 = new Font("Arial", Font.BOLD, 15);
-
-        JPanel test = new JPanel();
-        test.setLayout(new BorderLayout());
 
         // p1 
         p1.setLayout(new BoxLayout(p1, BoxLayout.X_AXIS));
@@ -335,6 +351,7 @@ public class Employee {
         p1.setBackground(new Color(10, 61, 98));
 
         center.add(p1);
+        System.out.println(name_text.getSize());
 
         //p2
         p2.setLayout(new BoxLayout(p2, BoxLayout.X_AXIS));
@@ -344,7 +361,7 @@ public class Employee {
 
 // الوصول إلى محرر التاريخ الداخلي وتعديل الخط والمحاذاة
         JTextField dateEditor = (JTextField) date_text.getDateEditor().getUiComponent();
-        dateEditor.setHorizontalAlignment(SwingConstants.RIGHT);  // محاذاة لليمين
+        // محاذاة لليمين
         dateEditor.setFont(f1);      // الخط
         dateEditor.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         date_text.setFont(f1);
@@ -465,10 +482,59 @@ public class Employee {
         p4.add(Box.createRigidArea(new Dimension(20, 0)));
 
         center.add(p4);
-        JPanel p9 = new JPanel();
-        p9.setBackground(new Color(10, 61, 98));
 
-        center.add(p9);
+        // p7
+        JPanel p7 = new JPanel();
+        p7.setBackground(new Color(10, 61, 98));
+        p7.setLayout(new BoxLayout(p7, BoxLayout.X_AXIS));
+        JLabel l = new JLabel("sdfs");
+        edit_label(l);
+
+        JTextField b22 = new JTextField(11);
+
+        b22.setFont(f1);
+
+        b22.setMaximumSize(new Dimension(Integer.MAX_VALUE, name_label.getPreferredSize().height + 11));
+        l.setMaximumSize(new Dimension(Integer.MAX_VALUE, name_text.getPreferredSize().height + 11));
+
+        l.setForeground(l.getBackground());
+        l.setForeground(new Color(10, 61, 98));
+
+        l.setBackground(new Color(10, 61, 98));
+
+        b22.setForeground(new Color(10, 61, 98));
+        b22.setCaretColor(new Color(10, 61, 98));
+        b22.setBackground(new Color(10, 61, 98));
+        b22.setBorder(null);
+        b22.setEnabled(false);
+        b22.setFocusable(false);
+
+        p7.add(Box.createRigidArea(new Dimension(20, 0)));
+        p7.add(b22);
+        p7.add(Box.createRigidArea(new Dimension(20, 0)));
+        p7.add(l);
+        p7.add(Box.createRigidArea(new Dimension(20, 0)));
+
+        JLabel date_join = new JLabel("تاريخ التسجيل");
+        edit_label(date_join);
+        JDateChooser date_text2 = new JDateChooser();
+
+        JTextField dateEditor2 = (JTextField) date_text2.getDateEditor().getUiComponent();
+
+        dateEditor2.setFont(f1);
+        dateEditor2.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+        date_text2.setFont(f1);
+
+        date_join.setMaximumSize(new Dimension(Integer.MAX_VALUE, name_label.getPreferredSize().height + 11));
+        date_text2.setMaximumSize(new Dimension(Integer.MAX_VALUE, name_text.getPreferredSize().height + 11));
+
+        date_text2.setPreferredSize(new Dimension(169, 0));
+
+        p7.add(date_text2);
+        p7.add(Box.createRigidArea(new Dimension(20, 0)));
+        p7.add(date_join);
+        p7.add(Box.createRigidArea(new Dimension(20, 0)));
+        center.add(p7);
 
         //p5
         ImageIcon icons[] = new ImageIcon[6];
@@ -544,19 +610,17 @@ public class Employee {
         p6.add(Box.createRigidArea(new Dimension(10, 0)));
         p6.setBackground(new Color(10, 61, 98));
         center.add(p6);
-        
-        
-        JPanel p8 = new JPanel();
-        
-        p8.setBackground(new Color(10, 61, 98));
-        
-        String radio_string[] = {"كل الموظفين","الموظفين الحاليين","الموظفين السابقين"};
 
-        JRadioButton radio_buttom[]=new JRadioButton[3];
-         ButtonGroup g = new ButtonGroup();
-        for(int i=0;i<3;i++)
-        {
-            radio_buttom[i]=new JRadioButton(radio_string[i]);
+        JPanel p8 = new JPanel();
+
+        p8.setBackground(new Color(10, 61, 98));
+
+        String radio_string[] = {"كل الموظفين", "الموظفين الحاليين", "الموظفين السابقين"};
+
+        
+        g = new ButtonGroup();
+        for (int i = 0; i < 3; i++) {
+            radio_buttom[i] = new JRadioButton(radio_string[i]);
             radio_buttom[i].setFont(new Font("Arial", Font.BOLD, 15));
             radio_buttom[i].setFocusPainted(false);
             radio_buttom[i].setBackground(new Color(10, 61, 98));
@@ -565,8 +629,24 @@ public class Employee {
             p8.add(radio_buttom[i]);
             p8.add(new JLabel("                                          "));
 
-        }    
-        
+        }
+        ActionListener aa = new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                
+                
+                    System.out.println("hell");
+                    Action_radio(Employee.radio_buttom,Employee.g);
+                    System.out.println("hell");
+                
+                  
+            }
+        };
+
+        radio_buttom[0].addActionListener(aa);
+        radio_buttom[1].addActionListener(aa);
+        radio_buttom[2].addActionListener(aa);
+        Action_radio(radio_buttom, g);
+
         center.add(p8);
 
         // Actions -------------------------------------------------------------------
@@ -582,10 +662,24 @@ public class Employee {
                                 JOptionPane.showMessageDialog(null, "يرجى التأكد من رقم الهاتف", "خطأ", JOptionPane.ERROR_MESSAGE);
                             } else {
                                 try {
-                                    String selectSQL = "SELECT id_employee FROM employee where id_employee = '" + number_text.getText() + "'";
+                                    String selectSQL = "SELECT id_employee,activ_emp FROM employee where id_employee = '" + number_text.getText() + "'";
                                     ResultSet rs2 = DataBaseMangemet.select_Query(selectSQL);
                                     if (rs2.next()) {
-                                        JOptionPane.showMessageDialog(null, "رقم التعريف الوطني مستعمل", "خطأ", JOptionPane.ERROR_MESSAGE);
+
+                                        if (rs2.getString("activ_emp").equals("0")) {
+                                            if (JOptionPane.showConfirmDialog(null, "هذا الموظف محذوف هل أنت متأكد من إسترجاعه ", "خطأ", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                                                selectSQL = "UPDATE employee SET activ_emp = '1', date_embauche= '" + new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + "',date_depart= '" + "2030-12-12" + "' where id_employee='"+number_text.getText()+"';";
+                                                DataBaseMangemet.ExexcuteStatement(selectSQL);
+                                                selectSQL = "insert into date_emp (id_employee,date_embauche,date_départ) values('" + number_text.getText() + "', '" + new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + "', '2030-12-12')";
+                                                DataBaseMangemet.ExexcuteStatement(selectSQL);
+
+                                                Action_radio(radio_buttom, g);
+
+                                            }
+                                        } else {
+                                            JOptionPane.showMessageDialog(null, "رقم التعريف الوطني مستعمل", "خطأ", JOptionPane.ERROR_MESSAGE);
+                                        }
+
                                     } else {
                                         selectSQL = "SELECT telephone FROM employee where telephone = '" + phone_text2.getText() + "'";
                                         rs2 = DataBaseMangemet.select_Query(selectSQL);
@@ -608,8 +702,8 @@ public class Employee {
                                                 formattedDate
                                             };
 
-                                            String sql = "INSERT INTO employee (id_employee, nom, prenom, date_naissance, date_embauche, telephone, post, salaire, etat, date_depart) "
-                                                    + "VALUES ('" + info[6] + "', '" + info[0] + "', '" + info[1] + "', '" + info[7] + "', '" + info[8] + "', '" + info[2] + "', '" + info[5] + "', '" + info[3] + "', '" + info[4] + "', '2030-12-12');";
+                                            String sql = "INSERT INTO employee (id_employee, nom, prenom, date_naissance, date_embauche, telephone, post, salaire, etat, date_depart,activ_emp) "
+                                                    + "VALUES ('" + info[6] + "', '" + info[0] + "', '" + info[1] + "', '" + info[7] + "', '" + info[8] + "', '" + info[2] + "', '" + info[5] + "', '" + info[3] + "', '" + info[4] + "', '2030-12-12','1');";
 
                                             DataBaseMangemet.ExexcuteStatement(sql);
                                             sql = "insert into photo_path(employee_id,path) values('" + info[6] + "','" + imagePath + "');";
@@ -620,22 +714,8 @@ public class Employee {
                                             sql = "insert into date_emp (id_employee,date_embauche,date_départ) values('" + info[6] + "', '" + info[8] + "', '2030-12-12')";
                                             DataBaseMangemet.ExexcuteStatement(sql);
 
-                                            model.setRowCount(0);
-                                            ResultSet rs = DataBaseMangemet.select_Query("select * from employee");
-                                            while (rs.next()) {
-                                                Vector<String> row = new Vector<>();
-                                                row.add(rs.getString("id_Employee"));
-                                                row.add(rs.getString("nom"));
-                                                row.add(rs.getString("prenom"));
-                                                row.add(rs.getString("date_naissance"));
-                                                row.add(rs.getString("date_embauche"));
-                                                row.add(rs.getString("date_depart"));
-                                                row.add(rs.getString("telephone"));
-                                                row.add(rs.getString("post"));
-                                                row.add(rs.getString("salaire"));
-                                                row.add(rs.getString("etat"));
-                                                model.addRow(row);
-                                            }
+                                            Action_radio(radio_buttom, g);
+
                                         }
 
                                     }
@@ -685,72 +765,59 @@ public class Employee {
                                                     JOptionPane.showMessageDialog(null, "يرجى التأكد من رقم الهاتف", "خطأ", JOptionPane.ERROR_MESSAGE);
                                                 } else {
                                                     try {
-                                                        selectSQL = "SELECT id_employee FROM employee where id_employee = '" + number_text.getText() + "'";
-                                                        rs2 = DataBaseMangemet.select_Query(selectSQL);
+                                                        if (JOptionPane.showConfirmDialog(null, "هل أنت متأكد", "تأكيد", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                                                            selectSQL = "SELECT id_employee FROM employee where id_employee = '" + number_text.getText() + "'";
+                                                            rs2 = DataBaseMangemet.select_Query(selectSQL);
 
-                                                        selectSQL = "SELECT telephone FROM employee where telephone = '" + phone_text2.getText() + "' and id_employee!='" + number_text.getText() + "'";
-                                                        rs2 = DataBaseMangemet.select_Query(selectSQL);
-                                                        if (rs2.next()) {
-                                                            JOptionPane.showMessageDialog(null, "رقم الهاتف موجود ", "خطأ", JOptionPane.ERROR_MESSAGE);
-                                                        } else {
-                                                            Date date = new Date();  // التاريخ الحالي
-                                                            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                                                            selectSQL = "SELECT telephone FROM employee where telephone = '" + phone_text2.getText() + "' and id_employee!='" + number_text.getText() + "'";
+                                                            rs2 = DataBaseMangemet.select_Query(selectSQL);
+                                                            if (rs2.next()) {
+                                                                JOptionPane.showMessageDialog(null, "رقم الهاتف موجود ", "خطأ", JOptionPane.ERROR_MESSAGE);
+                                                            } else {
+                                                                Date date = new Date();  // التاريخ الحالي
+                                                                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
-                                                            String formattedDate = formatter.format(date);
-                                                            String[] info = {
-                                                                name_text.getText(),
-                                                                prenom_text.getText(),
-                                                                phone_text2.getText(),
-                                                                (String) salar_text.getSelectedItem(),
-                                                                (String) state_text.getSelectedItem(),
-                                                                (String) grad_text.getSelectedItem(),
-                                                                number_text.getText(),
-                                                                new SimpleDateFormat("yyyy-MM-dd").format(date_text.getDate()),
-                                                                formattedDate
-                                                            };
+                                                                String formattedDate = formatter.format(date);
+                                                                String[] info = {
+                                                                    name_text.getText(),
+                                                                    prenom_text.getText(),
+                                                                    phone_text2.getText(),
+                                                                    (String) salar_text.getSelectedItem(),
+                                                                    (String) state_text.getSelectedItem(),
+                                                                    (String) grad_text.getSelectedItem(),
+                                                                    number_text.getText(),
+                                                                    new SimpleDateFormat("yyyy-MM-dd").format(date_text.getDate()),
+                                                                    formattedDate
+                                                                };
 
-                                                            String sql = "UPDATE employee SET "
-                                                                    + "nom='" + info[0] + "', "
-                                                                    + "prenom='" + info[1] + "', "
-                                                                    + "date_naissance='" + info[7] + "', "
-                                                                    + "telephone='" + info[2] + "', "
-                                                                    + "post='" + info[5] + "', "
-                                                                    + "salaire='" + info[3] + "', "
-                                                                    + "etat='" + info[4] + "', "
-                                                                    + "date_embauche='" + info[8] + "' "
-                                                                    + "WHERE id_employee='" + info[6] + "'";
+                                                                String sql = "UPDATE employee SET "
+                                                                        + "nom='" + info[0] + "', "
+                                                                        + "prenom='" + info[1] + "', "
+                                                                        + "date_naissance='" + info[7] + "', "
+                                                                        + "telephone='" + info[2] + "', "
+                                                                        + "post='" + info[5] + "', "
+                                                                        + "salaire='" + info[3] + "', "
+                                                                        + "etat='" + info[4] + "', "
+                                                                        + "date_embauche='" + info[8] + "' "
+                                                                        + "WHERE id_employee='" + info[6] + "'";
 
-                                                            DataBaseMangemet.ExexcuteStatement(sql);
+                                                                DataBaseMangemet.ExexcuteStatement(sql);
 
-                                                            if (!imagePath.isEmpty()) {
-                                                                sql = " select employee_id from photo_path where employee_id='" + info[6] + "';";
-                                                                ResultSet rs = DataBaseMangemet.select_Query(sql);
-                                                                if (rs.next()) {
-                                                                    sql = "update  photo_path set path = '" + imagePath + "'WHERE employee_id='" + info[6] + "';";
-                                                                    DataBaseMangemet.ExexcuteStatement(sql);
-                                                                } else {
-                                                                    sql = "insert into photo_path(employee_id,path) values('" + info[6] + "','" + imagePath + "');";
+                                                                if (!imagePath.isEmpty()) {
+                                                                    sql = " select employee_id from photo_path where employee_id='" + info[6] + "';";
+                                                                    ResultSet rs = DataBaseMangemet.select_Query(sql);
+                                                                    if (rs.next()) {
+                                                                        sql = "update  photo_path set path = '" + imagePath + "'WHERE employee_id='" + info[6] + "';";
                                                                         DataBaseMangemet.ExexcuteStatement(sql);
-                                                                    
+                                                                    } else {
+                                                                        sql = "insert into photo_path(employee_id,path) values('" + info[6] + "','" + imagePath + "');";
+                                                                        DataBaseMangemet.ExexcuteStatement(sql);
+
+                                                                    }
+
                                                                 }
 
-                                                            }
-
-                                                            model.setRowCount(0);
-                                                            ResultSet rs = DataBaseMangemet.select_Query("select * from employee");
-                                                            while (rs.next()) {
-                                                                Vector<String> row = new Vector<>();
-                                                                row.add(rs.getString("id_Employee"));
-                                                                row.add(rs.getString("nom"));
-                                                                row.add(rs.getString("prenom"));
-                                                                row.add(rs.getString("date_naissance"));
-                                                                row.add(rs.getString("date_embauche"));
-                                                                row.add(rs.getString("date_depart"));
-                                                                row.add(rs.getString("telephone"));
-                                                                row.add(rs.getString("post"));
-                                                                row.add(rs.getString("salaire"));
-                                                                row.add(rs.getString("etat"));
-                                                                model.addRow(row);
+                                                                Action_radio(radio_buttom, g);
                                                             }
                                                         }
 
@@ -808,6 +875,115 @@ public class Employee {
                                 } catch (Exception ee) {
                                     ee.printStackTrace();
                                 }
+                            } else {
+                                if (e.getSource() == b[1]) {
+
+                                    if (number_text.getText().length() == 9) {
+                                        try {
+                                            String selectSQL = "SELECT id_employee FROM employee where id_employee = '" + number_text.getText() + "'";
+                                            ResultSet rs2 = DataBaseMangemet.select_Query(selectSQL);
+                                            if (rs2.next()) {
+                                                selectSQL = "select activ_emp from employee where id_employee = '" + number_text.getText() + "';";
+                                                rs2 = DataBaseMangemet.select_Query(selectSQL);
+                                                if (rs2.next()) {
+                                                    if (rs2.getString("activ_emp").equals("1")) {
+                                                        Date past = new Date();
+                                                        selectSQL = "select date_embauche from employee where id_employee = '" + number_text.getText() + "';";
+                                                        rs2 = DataBaseMangemet.select_Query(selectSQL);
+                                                        if (rs2.next()) {
+                                                            past = rs2.getDate("date_embauche");
+                                                        }
+                                                        System.out.println(past);
+                                                        final Date past2 = past;
+
+                                                        JDateChooser jd = new JDateChooser();
+                                                        String message = "حذف موظف";
+
+                                                        Object[] params = {message, jd};
+                                                        JDialog dialog = new JDialog((Frame) null, message, true);
+                                                        dialog.setLayout(new GridLayout(3, 1, 0, 0));
+                                                        JPanel l1 = new JPanel();
+                                                        //l1.setLayout(new GridLayout(2));
+                                                        JPanel l2 = new JPanel();
+                                                        JPanel l3 = new JPanel();
+
+                                                        JLabel id_label = new JLabel("تاريخ الخروج");
+
+                                                        JLabel err = new JLabel("");
+                                                        err.setForeground(Color.red);
+
+                                                        JButton ok = new JButton(" Ok");
+                                                        ok.setPreferredSize(new Dimension(70, 30));
+                                                        JButton cancel = new JButton("Cancel");
+                                                        cancel.setPreferredSize(new Dimension(70, 30));
+                                                        cancel.setMargin(new Insets(0, 0, 0, 0));
+
+                                                        l1.add(id_label);
+                                                        l1.add(jd);
+
+                                                        l2.add(ok);
+                                                        l2.add(cancel);
+
+                                                        l3.add(err);
+
+                                                        dialog.add(l1);
+                                                        dialog.add(l2);
+                                                        dialog.add(l3);
+
+                                                        dialog.pack();
+                                                        dialog.setLocationRelativeTo(frame);
+                                                        ok.addActionListener(new ActionListener() {
+                                                            // @Override
+                                                            public void actionPerformed(ActionEvent e) {
+
+                                                                if (jd.getDate().after(past2)) {
+                                                                    if (JOptionPane.showConfirmDialog(null, "هل أنت متأكد ", "تأكيد", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+
+                                                                        String update = "UPDATE date_emp SET date_départ = '" + new SimpleDateFormat("yyyy-MM-dd").format(jd.getDate()) + "' where id_employee ='" + number_text.getText() + "';";
+                                                                        DataBaseMangemet.ExexcuteStatement(update);
+                                                                        update = "UPDATE employee SET activ_emp = 0 where id_employee = '" + number_text.getText() + "';";
+
+                                                                        DataBaseMangemet.ExexcuteStatement(update);
+
+                                                                        update = "UPDATE employee SET date_depart = '" + new SimpleDateFormat("yyyy-MM-dd").format(jd.getDate()) + "' where id_employee ='" + number_text.getText() + "';";
+                                                                        dialog.dispose();
+                                                                        DataBaseMangemet.ExexcuteStatement(update);
+                                                                        System.out.println("asldkfjasldkfjas;dlkfj");
+                                                                        Action_radio(radio_buttom, g);
+
+                                                                    }
+                                                                } else {
+                                                                    err.setText("هذا التاريخ لايمكن إستعماله");
+                                                                }
+                                                            }
+                                                        });
+                                                        cancel.addActionListener(new ActionListener() {
+                                                            public void actionPerformed(ActionEvent e) {
+                                                                dialog.dispose();
+                                                            }
+                                                        });
+                                                        dialog.setVisible(true);
+
+                                                    }
+                                                } else {
+                                                    JOptionPane.showMessageDialog(null, "هذا الموظف محذوف", "حطأ", JOptionPane.ERROR_MESSAGE);
+                                                }
+
+                                            } else {
+                                                JOptionPane.showMessageDialog(null, "هذا المعرف غير موجود", "حطأ", JOptionPane.ERROR_MESSAGE);
+                                            }
+                                        } catch (Exception e2) {
+                                            System.out.println("❌ Connection failed.546");
+                                            e2.printStackTrace();
+
+                                        }
+
+                                    } else {
+                                        JOptionPane.showMessageDialog(null, "هذا المعرف خاطئ", "حطأ", JOptionPane.ERROR_MESSAGE);
+                                    }
+
+                                }
+
                             }
                         }
                     }
@@ -815,6 +991,7 @@ public class Employee {
             }
         };
         b[0].addActionListener(ActionListener);
+        b[1].addActionListener(ActionListener);
         b[3].addActionListener(ActionListener);
         b[2].addActionListener(ActionListener);
         b[5].addActionListener(ActionListener);
@@ -826,8 +1003,7 @@ public class Employee {
         model.addListSelectionListener(
                 new ListSelectionListener() {
             @Override
-            public void valueChanged(ListSelectionEvent e
-            ) {
+            public void valueChanged(ListSelectionEvent e) {
                 if (!e.getValueIsAdjusting()) {
                     int row = table.getSelectedRow();
                     if (row >= 0) {
@@ -874,7 +1050,6 @@ public class Employee {
         );
 
     }
-
 
     /* public static void main(String[] args) {
         Employee e = new Employee();

@@ -1,7 +1,7 @@
 
 import javax.swing.*;
 import java.sql.*;
-
+//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
 public class DataBaseMangemet
 {
     static Connection conn = null;
