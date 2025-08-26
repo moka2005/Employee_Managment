@@ -28,6 +28,8 @@ public class Absence {
     JTextField number_text;
     JTextField cause_text;
     JDateChooser date_text;
+    JComboBox<String> state_text;
+    JComboBox<String> paying_text;
    static CardLayout cardLayout;
     static JPanel cardPanel;
 
@@ -58,7 +60,7 @@ public class Absence {
         }
     }        
 
-    public void edit_label(JLabel a) {
+    public static void edit_label(JLabel a) {
         Font f1 = new Font("Arial", Font.BOLD, 20);
         a.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
@@ -107,6 +109,7 @@ public class Absence {
             @Override
             public void actionPerformed(ActionEvent e) {
 
+                Employee.imagePath="";
                 cardLayout.show(cardPanel, "page1");
             }
         });
@@ -267,9 +270,17 @@ public class Absence {
         p4.setLayout(new BoxLayout(p4, BoxLayout.X_AXIS));
         JLabel date_ap = new JLabel("تاريخ الغياب");
         edit_label(date_ap);
+        JLabel cause = new JLabel("سبب الغياب");
+        edit_label(cause);
 
-        p4.add(Box.createRigidArea(new Dimension(300, 0)));
+        p4.add(Box.createRigidArea(new Dimension(150, 0)));
         p4.add(date_ap);
+        
+
+        
+
+        p4.add(Box.createRigidArea(new Dimension(150, 0)));
+        p4.add(cause);
         west_center.add(p4);
 
         //p5 ------------------------------------------------------------------------
@@ -280,47 +291,86 @@ public class Absence {
         p5.setBackground(new Color(10, 61, 98));
 
         date_text = new JDateChooser();
-
+        
         date_text.setFont(f2);
         date_text.setMaximumSize(new Dimension(220, 30));
         date_text.setDateFormatString("yyyy-MM-d");
 
-        p5.add(Box.createRigidArea(new Dimension(260, 0)));
+        p5.add(Box.createRigidArea(new Dimension(110, 0)));
         p5.add(date_text);
 
-        west_center.add(p5);
+      
 
-        JPanel p6 = new JPanel();
-        p6.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
-        p6.setBackground(new Color(10, 61, 98));
-        p6.setLayout(new BoxLayout(p6, BoxLayout.X_AXIS));
-        JLabel cause = new JLabel("سبب الغياب");
-        edit_label(cause);
+       
+       
+        
+       
 
-        p6.add(Box.createRigidArea(new Dimension(300, 0)));
-
-        p6.add(cause);
-
-        west_center.add(Box.createRigidArea(new Dimension(0, 20)));
-        west_center.add(p6);
-
-        //p7 ------------------------------------------------------------------------
-        JPanel p7 = new JPanel();
-        p7.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
-        p7.setBackground(new Color(10, 61, 98));
-        p7.setLayout(new BoxLayout(p7, BoxLayout.X_AXIS));
-        p7.setBackground(new Color(10, 61, 98));
+        
+       
 
         cause_text = new JTextField();
+        cause_text.setColumns(15);
         cause_text.setFont(f2);
         cause_text.setMaximumSize(new Dimension(220, 30));
         cause_text.setHorizontalAlignment(JTextField.CENTER);
         
-        p7.add(Box.createRigidArea(new Dimension(260, 0)));
-        p7.add(cause_text);
+        p5.add(Box.createRigidArea(new Dimension(80, 0)));
+        p5.add(cause_text);
+          west_center.add(p5);
+        
+        //p6-----------------------------------------------------------
+        JPanel p6 = new JPanel();
+        p6.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        p6.setBackground(new Color(10, 61, 98));
+        p6.setLayout(new BoxLayout(p6, BoxLayout.X_AXIS));
+        p6.setBackground(new Color(10, 61, 98));
+        
+        JLabel state = new JLabel("الحالة");
+        edit_label(state);
+        
+        JLabel paying = new JLabel("الدفع");
+        edit_label(paying);
+        
+        p6.add(Box.createRigidArea(new Dimension(150, 0)));
+        p6.add(state);
+        p6.add(Box.createRigidArea(new Dimension(150, 0)));
+        p6.add(paying);
+        west_center.add(p6);
 
+        //p7-------------------------------------------------------------------
+        JPanel p7 = new JPanel();
+         p7.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        p7.setBackground(new Color(10, 61, 98));
+        p7.setLayout(new BoxLayout(p7, BoxLayout.X_AXIS));
+        p7.setBackground(new Color(10, 61, 98));
+        String grad_value[] = {"حاضر", "غائب"};
+
+        state_text = new JComboBox<>(grad_value);
+        state_text.setFont(f2);
+        state_text.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+        ((JLabel) state_text.getRenderer()).setHorizontalAlignment(JLabel.RIGHT);
+
+        
+        state_text.setMaximumSize(new Dimension(220, 30));
+
+        state_text.setPreferredSize(new Dimension(169, 22));
+        p7.add(Box.createRigidArea(new Dimension(110, 0)));
+        p7.add(state_text);
+        String paying_value[] = {"مدفوع", "غير مدفوع"};
+
+        paying_text = new JComboBox<>(paying_value);
+        paying_text.setFont(f2);
+        paying_text.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+        ((JLabel) paying_text.getRenderer()).setHorizontalAlignment(JLabel.RIGHT);
+
+        
+        paying_text.setMaximumSize(new Dimension(220, 30));
+
+        paying_text.setPreferredSize(new Dimension(169, 22));
+        p7.add(Box.createRigidArea(new Dimension(80, 0)));
+        p7.add(paying_text);
         west_center.add(p7);
-
         //p8 ------------------------------------------------------------------------
         JPanel p8 = new JPanel();
         p8.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
@@ -471,9 +521,19 @@ public class Absence {
                                             String sql = "select id_employee from employee where id_employee='" + number_text.getText() + "';";
                                             ResultSet rs = DataBaseMangemet.select_Query(sql);
                                             if (rs.next()) {
-
-                                                sql = "insert into absences (id_employee,absence_date,reason) values('" + number_text.getText() + "','" + date_text.getDate() + "','" + cause_text.getText() + "'); ";
-                                                DataBaseMangemet.ExexcuteStatement(sql);
+                                                if(state_text.getSelectedItem().equals("حاضر"))
+                                                {
+                                                    sql = "insert into absences (id_employee,absence_date,state,paying_state) values('" + number_text.getText() + "','" + date_text.getDate() + "','"+state_text.getSelectedItem()+"','"+paying_text.getSelectedItem()+"');";
+                                                    cause_text.setForeground(Color.red);
+                                                    DataBaseMangemet.ExexcuteStatement(sql);
+                                                }
+                                                else
+                                                {
+                                                    sql = "insert into absences (id_employee,absence_date,cause,state,paying_state) values('" + number_text.getText() + "','" + cause_text.getText() + "','" + date_text.getDate() + "','"+state_text.getSelectedItem()+"','"+paying_text.getSelectedItem()+"');";
+                                                    cause_text.setForeground(Color.red);
+                                                    DataBaseMangemet.ExexcuteStatement(sql);
+                                                }    
+                                                
                                                 if(JOptionPane.showConfirmDialog(null, "هل أنت متأكد", "تأكيد",JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION)
                                                 {
                                                     JOptionPane.showMessageDialog(null, "تم إاضافة الغياب بنجاح", "", JOptionPane.INFORMATION_MESSAGE);
