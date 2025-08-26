@@ -12,20 +12,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.sql.ResultSet;
-import java.util.Vector;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
@@ -42,7 +38,7 @@ public class WelcomePage {
 
         cardLayout = new CardLayout();
         cardPanel = new JPanel(cardLayout);
-        //Login2.frame.dispose();
+       // Login2.frame.dispose();
         frame2 = new JFrame();
         frame = new JPanel();
         this.id = id;
@@ -56,12 +52,16 @@ public class WelcomePage {
         count a = new count(cardLayout, cardPanel);
         Employee b = new Employee(cardLayout, cardPanel);
         Absence c = new Absence(cardLayout, cardPanel);
+        Flow_Absence d = new Flow_Absence(cardLayout, cardPanel);
+        Expenses e = new Expenses(cardLayout,cardPanel);
                            
 
         cardPanel.add(frame, "page1");
         cardPanel.add(a.frame, "page2");
         cardPanel.add(b.frame, "page3");
         cardPanel.add(c.frame, "page4");
+        cardPanel.add(d.frame, "page5");
+        cardPanel.add(e.frame, "page6");
         
 
         cardLayout.show(cardPanel, "page1");
@@ -77,6 +77,10 @@ public class WelcomePage {
         gg.setPreferredSize(new Dimension(x, 55));
 
         JPanel p1 = new JPanel();
+        Locale arabicLocale = Locale.FRANCE;
+        SimpleDateFormat sdf = new SimpleDateFormat("EEEE, d MMMM yyyy", arabicLocale);
+        Date a = new Date();
+        String arabicDate = sdf.format(a);
         p1.setLayout(new BorderLayout());
         p1.setPreferredSize(new Dimension(x, 50));
         p1.setBackground(Color.RED);
@@ -99,7 +103,7 @@ public class WelcomePage {
         c.setBackground(Color.LIGHT_GRAY);
 
         JPanel imagePanel = new JPanel() {
-            Image img = new ImageIcon("/home/mokhtar-mammeri/Desktop/BME2/src/Logo3.jpeg").getImage();
+            Image img = new ImageIcon("/home/mokhtar-mammeri/Desktop/BME2/icons/welcompage.jpeg").getImage();
 
             @Override
             protected void paintComponent(Graphics g) {
@@ -142,8 +146,13 @@ public class WelcomePage {
         frame.add(cc, BorderLayout.WEST);
         frame.add(c, BorderLayout.CENTER);
         frame.add(n, BorderLayout.SOUTH);
+        
+        JLabel today = new JLabel(arabicDate);
+        today.setFont(f);
 
+        p1.add(new JLabel("                                                               "),BorderLayout.WEST);
         p1.add(l, BorderLayout.CENTER);
+        p1.add(today,BorderLayout.EAST);
         gg.add(p1, BorderLayout.NORTH);
         frame.add(gg, BorderLayout.NORTH);
 
@@ -193,12 +202,15 @@ public class WelcomePage {
     }
 
     public static void creat_Button(int y, JPanel Buttons) {
-        String[] s = {"إدارة الحسابات", "العمال", "إدخال الغيابات", "متابعة الغيابات", "v"};
+        String[] s = {"إدارة الحسابات", "إدارة العمال     ", " إدخال الغيابات", " متابعة الغيابات","إدارة المصاريف"};
+        ImageIcon icon2 [] = new  ImageIcon[5];
+        String iconString[] = {"/home/mokhtar-mammeri/Desktop/BME2/icons/counts.png","/home/mokhtar-mammeri/Desktop/BME2/icons/employee.png","/home/mokhtar-mammeri/Desktop/BME2/icons/absences.png","/home/mokhtar-mammeri/Desktop/BME2/icons/Flowabsances.png","/home/mokhtar-mammeri/Desktop/BME2/icons/absences.png"};
         JButton b[] = new JButton[11];
         Font f = new Font("Arial", Font.BOLD, 25);
 
         for (int i = 0; i < 5; i++) {
-            JButton a = new JButton(s[i]);
+            icon2[i] = new ImageIcon(iconString[i]);
+            JButton a = new JButton(s[i],icon2[i]);
             a.setFont(f);
             b[i] = a;
             //a.setPreferredSize(new Dimension(150, 10));
@@ -267,13 +279,33 @@ public class WelcomePage {
 
                 } else {
                     if (e.getSource() == b[1]) {
+                        Employee.imagePath="";
                         cardLayout.show(cardPanel, "page3");
 
                     } else {
                         if (e.getSource() == b[2]) {
+                            Employee.imagePath="";
                             Absence.update();
                             cardLayout.show(cardPanel, "page4");
                         }
+                        else
+                        {
+                            if(e.getSource()==b[3])
+                            {
+                                Employee.imagePath="";
+                                Flow_Absence.a.setText("الرصيد");
+                                cardLayout.show(cardPanel, "page5");
+                            }
+                            else
+                            {
+                                if(e.getSource()==b[4])
+                                {
+                                    Expenses.update(true);
+                                    cardLayout.show(cardPanel, "page6");
+                                }    
+                            }    
+                        }    
+                        
                     }
                 }
 
@@ -282,6 +314,8 @@ public class WelcomePage {
         b[0].addActionListener(ActionListener);
         b[1].addActionListener(ActionListener);
         b[2].addActionListener(ActionListener);
+        b[3].addActionListener(ActionListener);
+        b[4].addActionListener(ActionListener);
     }
 
     public static void main(String args[]) {

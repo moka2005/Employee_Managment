@@ -48,11 +48,14 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 class pd extends JPanel {
 
     public void paintComponent(Graphics g) {
+        System.out.println("44");
         if (Employee.imagePath.isEmpty()) {
             Employee.img = new ImageIcon("/home/mokhtar-mammeri/Desktop/BME2/icons/profil.png").getImage();
+             
         } else {
             Employee.img = new ImageIcon(Employee.imagePath).getImage();
         }
+       
         super.paintComponent(g);
         int w = getWidth();
         int h = getHeight();
@@ -127,7 +130,7 @@ public class Employee {
                 row.add(rs.getString("date_depart"));
                 row.add(rs.getString("telephone"));
                 row.add(rs.getString("post"));
-                row.add(rs.getString("salaire"));
+                row.add(rs.getString("salaire")+"DA");
                 row.add(rs.getString("etat"));
                 model.addRow(row);
             }
@@ -170,6 +173,7 @@ public class Employee {
             @Override
             public void actionPerformed(ActionEvent e) {
 
+                Employee.imagePath="";
                 cardLayout.show(cardPanel, "page1");
             }
         });
@@ -416,9 +420,9 @@ public class Employee {
         p3.add(grad);
         p3.add(Box.createRigidArea(new Dimension(20, 0)));
 
-        JLabel salar = new JLabel("الدخل");
+        JLabel salar = new JLabel("	الدخل اليومي (DA)");
         edit_label(salar);
-        String salar_value[] = {"30000DA", "40000DA"};
+        String salar_value[] = {"10000", "15000"};
         JComboBox<String> salar_text = new JComboBox<>(salar_value);
         salar_text.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         ((JLabel) salar_text.getRenderer()).setHorizontalAlignment(JLabel.RIGHT);
@@ -838,6 +842,10 @@ public class Employee {
 
                                 }
                             }
+                            else
+                            {
+                                JOptionPane.showMessageDialog(null, "الرجاء ملئ كل المعلومات", "خطأ", JOptionPane.ERROR_MESSAGE);
+                            }    
                         } else {
                             if (e.getSource() == b[0]) {
                                 JFileChooser fileChooser = new JFileChooser();
