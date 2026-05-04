@@ -284,7 +284,7 @@ public class Expenses {
 
         Font f = new Font("Arial", Font.BOLD, 35);
         l.setFont(f);
-        ImageIcon icon = new ImageIcon("/home/mokhtar-mammeri/Desktop/BME2/icons/home.png");
+        ImageIcon icon = new ImageIcon("/home/mokhtar/Desktop/BME2/icons/home.png");
         JButton home_page = new JButton("الصفحة الرئيسية", icon);
         home_page.setIconTextGap(4);
         home_page.setPreferredSize(new Dimension(250, 60));
@@ -313,7 +313,7 @@ public class Expenses {
         // west ----------------------------------------------------------------
         Font f1 = new Font("Arial", Font.BOLD, 15);
         JPanel west = new JPanel();
-        west.setPreferredSize(new Dimension(900, 0));
+        west.setPreferredSize(new Dimension(750, 0));
         west.setBackground(new Color(10, 61, 98));
         west.setLayout(new BoxLayout(west, BoxLayout.Y_AXIS));
         frame.add(west, BorderLayout.WEST);
@@ -443,7 +443,7 @@ public class Expenses {
         p4.setLayout(new BoxLayout(p4, BoxLayout.X_AXIS));
         p4.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
 
-        ImageIcon icon2 = new ImageIcon("/home/mokhtar-mammeri/Desktop/BME2/icons/delete.png");
+        ImageIcon icon2 = new ImageIcon("/home/mokhtar/Desktop/BME2/icons/delete.png");
         JButton delete = new JButton("حذف البيان    ", icon2);
 
         delete.setFocusPainted(false);
@@ -452,10 +452,10 @@ public class Expenses {
         delete.setForeground(Color.red);
         delete.setMaximumSize(new Dimension(170, 50));
 
-        p4.add(Box.createRigidArea(new Dimension(230, 0)));
+        p4.add(Box.createRigidArea(new Dimension(200, 0)));
         p4.add(delete);
 
-        ImageIcon icon3 = new ImageIcon("/home/mokhtar-mammeri/Desktop/BME2/icons/include.png");
+        ImageIcon icon3 = new ImageIcon("/home/mokhtar/Desktop/BME2/icons/include.png");
         JButton add = new JButton("إضافة      ", icon3);
 
         add.setFocusPainted(false);
@@ -478,7 +478,7 @@ public class Expenses {
 
         JLabel head = new JLabel("متابعة المصروفات");
         edit_label(head);
-        p5.add(Box.createRigidArea(new Dimension(350, 0)));
+        p5.add(Box.createRigidArea(new Dimension(300, 0)));
         p5.add(head);
         west.add(Box.createRigidArea(new Dimension(0, 60)));
         west.add(p5);
@@ -493,10 +493,10 @@ public class Expenses {
         edit_label(begin);
         JLabel end = new JLabel("تاريخ النهاية");
         edit_label(end);
-        p6.add(Box.createRigidArea(new Dimension(150, 0)));
+        p6.add(Box.createRigidArea(new Dimension(100, 0)));
 
         p6.add(begin);
-        p6.add(Box.createRigidArea(new Dimension(200, 0)));
+        p6.add(Box.createRigidArea(new Dimension(150, 0)));
         p6.add(end);
         west.add(Box.createRigidArea(new Dimension(0, 20)));
         west.add(p6);
@@ -519,7 +519,7 @@ public class Expenses {
 
         begin_text.setPreferredSize(new Dimension(250, 0));
 
-        p7.add(Box.createRigidArea(new Dimension(120, 0)));
+        p7.add(Box.createRigidArea(new Dimension(70, 0)));
         p7.add(begin_text);
 
          end_text = new JDateChooser();
@@ -533,13 +533,13 @@ public class Expenses {
         end_text.setMaximumSize(new Dimension(250, name_text.getPreferredSize().height + 11));
 
         end_text.setPreferredSize(new Dimension(250, 0));
-        p7.add(Box.createRigidArea(new Dimension(160, 0)));
+        p7.add(Box.createRigidArea(new Dimension(110, 0)));
         p7.add(end_text);
         p7.add(Box.createRigidArea(new Dimension(30, 0)));
         west.add(p7);
 
         // p8 --------------------------------------------------------------------
-        ImageIcon icon5 = new ImageIcon("/home/mokhtar-mammeri/Desktop/BME2/icons/clearfilter.png");
+        ImageIcon icon5 = new ImageIcon("/home/mokhtar/Desktop/BME2/icons/filter.png");
 
         JButton filtering = new JButton("تصفية      ", icon5);
 
@@ -554,7 +554,7 @@ public class Expenses {
         filtering.setForeground(Color.red);
         filtering.setMaximumSize(new Dimension(170, 50));
 
-        p8.add(Box.createRigidArea(new Dimension(350, 0)));
+        p8.add(Box.createRigidArea(new Dimension(300, 0)));
         p8.add(filtering);
         west.add(Box.createRigidArea(new Dimension(0, 30)));
 

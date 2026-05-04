@@ -50,7 +50,7 @@ class pd extends JPanel {
     public void paintComponent(Graphics g) {
         System.out.println("44");
         if (Employee.imagePath.isEmpty()) {
-            Employee.img = new ImageIcon("/home/mokhtar-mammeri/Desktop/BME2/icons/profil.png").getImage();
+            Employee.img = new ImageIcon("/home/mokhtar/Desktop/BME2/icons/profil.png").getImage();
              
         } else {
             Employee.img = new ImageIcon(Employee.imagePath).getImage();
@@ -161,7 +161,7 @@ public class Employee {
 
         North.add(label_head, BorderLayout.CENTER);
         North.add(east, BorderLayout.EAST);
-        ImageIcon icon = new ImageIcon("/home/mokhtar-mammeri/Desktop/BME2/icons/home.png");
+        ImageIcon icon = new ImageIcon("/home/mokhtar/Desktop/BME2/icons/home.png");
         JButton home_page = new JButton("الصفحة الرئيسية", icon);
         home_page.setIconTextGap(4);
         home_page.setPreferredSize(new Dimension(250, 60));
@@ -200,7 +200,7 @@ public class Employee {
         south2.setPreferredSize(new Dimension(0, 200));
 
         south2.add(Box.createRigidArea(new Dimension(0, 20)));
-        JLabel img_emp = new JLabel("صورة الموضف");
+        JLabel img_emp = new JLabel("صورة الموظف");
         img_emp.setOpaque(true);
 
         edit_label(img_emp);
@@ -211,7 +211,7 @@ public class Employee {
         south2.add(img_emp);
         south2.add(Box.createRigidArea(new Dimension(0, 20)));
 
-        ImageIcon addicon = new ImageIcon("/home/mokhtar-mammeri/Desktop/BME2/icons/addicon.png");
+        ImageIcon addicon = new ImageIcon("/home/mokhtar/Desktop/BME2/icons/addicon.png");
 
         add_icon = new JButton("رفع صورة", addicon);
         add_icon.addActionListener(new ActionListener() {
@@ -321,7 +321,7 @@ public class Employee {
 
         // p1 
         p1.setLayout(new BoxLayout(p1, BoxLayout.X_AXIS));
-        JLabel name_label = new JLabel("إسم الموضف");
+        JLabel name_label = new JLabel("إسم الموظف");
         edit_label(name_label);
         JTextField name_text = new JTextField(11);
         name_text.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
@@ -422,7 +422,7 @@ public class Employee {
 
         JLabel salar = new JLabel("	الدخل اليومي (DA)");
         edit_label(salar);
-        String salar_value[] = {"10000", "15000"};
+        String salar_value[] = {"1000", "1500"};
         JComboBox<String> salar_text = new JComboBox<>(salar_value);
         salar_text.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         ((JLabel) salar_text.getRenderer()).setHorizontalAlignment(JLabel.RIGHT);
@@ -542,14 +542,14 @@ public class Employee {
 
         //p5
         ImageIcon icons[] = new ImageIcon[6];
-        String icons_path[] = {"/home/mokhtar-mammeri/Desktop/BME2/icons/excel.png", "/home/mokhtar-mammeri/Desktop/BME2/icons/delete.png",
-            "/home/mokhtar-mammeri/Desktop/BME2/icons/include.png", "/home/mokhtar-mammeri/Desktop/BME2/icons/edit.png", "/home/mokhtar-mammeri/Desktop/BME2/icons/print.png",
-            "/home/mokhtar-mammeri/Desktop/BME2/icons/empty.png"};
+        String icons_path[] = {"/home/mokhtar/Desktop/BME2/icons/excel.png", "/home/mokhtar/Desktop/BME2/icons/delete.png",
+            "/home/mokhtar/Desktop/BME2/icons/include.png", "/home/mokhtar/Desktop/BME2/icons/edit.png", "/home/mokhtar/Desktop/BME2/icons/print.png",
+            "/home/mokhtar/Desktop/BME2/icons/empty.png"};
         for (int i = 0; i < 6; i++) {
             icons[i] = new ImageIcon(icons_path[i]);
         }
 
-        String buttons[] = {"إستخراج", "حذف البيان", "موضف جديد", "تعديل وحفض"};
+        String buttons[] = {"إستخراج", "حذف البيان", "موظف جديد", "تعديل وحفض"};
         JButton b[] = new JButton[6];
         p5.setLayout(new BoxLayout(p5, BoxLayout.X_AXIS));
         for (int i = 0; i < 3; i++) {

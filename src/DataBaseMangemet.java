@@ -10,7 +10,7 @@ public class DataBaseMangemet
         try
         {
             Class.forName("org.postgresql.Driver"); // <-- أضف هذا السطر هنا
-            conn = DriverManager.getConnection("jdbc:postgresql://172.26.215.146:5432/project", "postgres", "2005");
+            conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/project", "postgres", "2005");
         }
         catch (ClassNotFoundException | SQLException e)
         {

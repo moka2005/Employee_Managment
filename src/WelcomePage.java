@@ -103,7 +103,7 @@ public class WelcomePage {
         c.setBackground(Color.LIGHT_GRAY);
 
         JPanel imagePanel = new JPanel() {
-            Image img = new ImageIcon("/home/mokhtar-mammeri/Desktop/BME2/icons/welcompage.jpeg").getImage();
+            Image img = new ImageIcon("/home/mokhtar/Desktop/BME2/icons/welcompage.jpeg").getImage();
 
             @Override
             protected void paintComponent(Graphics g) {
@@ -131,7 +131,7 @@ public class WelcomePage {
         g.setLayout(new BorderLayout());
 
         JPanel Buttons = new JPanel();
-        Buttons.setLayout(new GridLayout(5, 1, 10, 2));
+        Buttons.setLayout(new GridLayout(6, 1, 10, 2));
         Buttons.setBackground(Color.RED);
 
         g.setPreferredSize(new Dimension(270, y));
@@ -202,13 +202,13 @@ public class WelcomePage {
     }
 
     public static void creat_Button(int y, JPanel Buttons) {
-        String[] s = {"إدارة الحسابات", "إدارة العمال     ", " إدخال الغيابات", " متابعة الغيابات","إدارة المصاريف"};
-        ImageIcon icon2 [] = new  ImageIcon[5];
-        String iconString[] = {"/home/mokhtar-mammeri/Desktop/BME2/icons/counts.png","/home/mokhtar-mammeri/Desktop/BME2/icons/employee.png","/home/mokhtar-mammeri/Desktop/BME2/icons/absences.png","/home/mokhtar-mammeri/Desktop/BME2/icons/Flowabsances.png","/home/mokhtar-mammeri/Desktop/BME2/icons/absences.png"};
+        String[] s = {"إدارة الحسابات", "إدارة العمال     ", "إدارة الحضور ", "متابعة الحضور ","إدارة المصاريف","السجلات"};
+        ImageIcon icon2 [] = new  ImageIcon[6];
+        String iconString[] = {"/home/mokhtar/Desktop/BME2/icons/counts.png","/home/mokhtar/Desktop/BME2/icons/employee.png","/home/mokhtar/Desktop/BME2/icons/absences.png","/home/mokhtar/Desktop/BME2/icons/Flowabsances.png","/home/mokhtar/Desktop/BME2/icons/absences.png","/home/mokhtar/Desktop/BME2/icons/absences.png"};
         JButton b[] = new JButton[11];
         Font f = new Font("Arial", Font.BOLD, 25);
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 6; i++) {
             icon2[i] = new ImageIcon(iconString[i]);
             JButton a = new JButton(s[i],icon2[i]);
             a.setFont(f);
@@ -293,7 +293,7 @@ public class WelcomePage {
                             if(e.getSource()==b[3])
                             {
                                 Employee.imagePath="";
-                                Flow_Absence.a.setText("الرصيد");
+                                Flow_Absence.a.setText("DA");
                                 cardLayout.show(cardPanel, "page5");
                             }
                             else

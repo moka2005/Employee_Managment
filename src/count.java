@@ -116,10 +116,10 @@ public class count {
         JPanel south = new JPanel();
         south.setPreferredSize(new Dimension(frame.getWidth(),200));
         
-        ImageIcon insert_icon= new ImageIcon("/home/mokhtar-mammeri/Desktop/BME2/icons/include.png");
+        ImageIcon insert_icon= new ImageIcon("/home/mokhtar/Desktop/BME2/icons/include.png");
         JButton insert = new JButton("إضافة حساب",insert_icon);
         
-        ImageIcon delete_icon = new ImageIcon("/home/mokhtar-mammeri/Desktop/BME2/icons/delete.png");
+        ImageIcon delete_icon = new ImageIcon("/home/mokhtar/Desktop/BME2/icons/delete.png");
         JButton Delete = new JButton("حذف حساب",delete_icon);
         insert.setBackground(Color.white);
         Delete.setBackground(Color.white);
@@ -130,7 +130,7 @@ public class count {
         Delete.setFocusPainted(false);
         
         
-        ImageIcon edit_icon= new ImageIcon("/home/mokhtar-mammeri/Desktop/BME2/icons/edit.png");
+        ImageIcon edit_icon= new ImageIcon("/home/mokhtar/Desktop/BME2/icons/edit.png");
         JButton changePass = new JButton("تغيير كلمة السر",edit_icon);
         
   
@@ -148,7 +148,7 @@ public class count {
         
         
         
-        ImageIcon home_icon= new ImageIcon("/home/mokhtar-mammeri/Desktop/BME2/icons/home.png");
+        ImageIcon home_icon= new ImageIcon("/home/mokhtar/Desktop/BME2/icons/home.png");
         JButton welcom_pag = new JButton("الصفحة الرئيسية",home_icon);
 
         

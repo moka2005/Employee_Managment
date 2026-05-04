@@ -93,11 +93,11 @@ public class Absence {
         frame.add(north, BorderLayout.NORTH);
        north.setLayout(new BoxLayout(north, BoxLayout.X_AXIS));
        
-        JLabel head = new JLabel("إدخال الغيابات");
+        JLabel head = new JLabel("إدارة الحضور");
         head.setFont(new Font("Arial", Font.BOLD, 35));
        
         
-        ImageIcon icon = new ImageIcon("/home/mokhtar-mammeri/Desktop/BME2/icons/home.png");
+        ImageIcon icon = new ImageIcon("/home/mokhtar/Desktop/BME2/icons/home.png");
         JButton home_page = new JButton("الصفحة الرئيسية", icon);
         home_page.setIconTextGap(4);
         home_page.setPreferredSize(new Dimension(250, 60));
@@ -163,7 +163,7 @@ public class Absence {
         //west.north--------------------------------------------------------------
         JPanel west_north = new JPanel();
 
-        west_north.setPreferredSize(new Dimension(0, 300));
+        west_north.setPreferredSize(new Dimension(0, 200));
         west_north.setLayout(new BorderLayout());
 
         JPanel west_north_north = new JPanel();
@@ -174,7 +174,7 @@ public class Absence {
         west_north_north.setPreferredSize(new Dimension(0, 0));
         west_north_west.setPreferredSize(new Dimension(187, 0));
         west_north_east.setPreferredSize(new Dimension(187, 0));
-        profil_icon.setMaximumSize(new Dimension(Integer.MAX_VALUE, 400));
+        profil_icon.setMaximumSize(new Dimension(Integer.MAX_VALUE, 200));
         profil_icon.setBackground(new Color(10, 61, 98));
 
         west_north.add(west_north_north, BorderLayout.NORTH);
@@ -378,7 +378,7 @@ public class Absence {
         p8.setLayout(new BoxLayout(p8, BoxLayout.X_AXIS));
         p8.setBackground(new Color(10, 61, 98));
 
-        ImageIcon icon2 = new ImageIcon("/home/mokhtar-mammeri/Desktop/BME2/icons/include.png");
+        ImageIcon icon2 = new ImageIcon("/home/mokhtar/Desktop/BME2/icons/include.png");
         JButton add = new JButton("إدخال الغياب", icon2);
 
         add.setFocusPainted(false);
@@ -529,7 +529,7 @@ public class Absence {
                                                 }
                                                 else
                                                 {
-                                                    sql = "insert into absences (id_employee,absence_date,cause,state,paying_state) values('" + number_text.getText() + "','" + cause_text.getText() + "','" + date_text.getDate() + "','"+state_text.getSelectedItem()+"','"+paying_text.getSelectedItem()+"');";
+                                                    sql = "insert into absences (id_employee,absence_date,reason,state,paying_state) values('" + number_text.getText() + "','" + date_text.getDate() + "','" + cause_text.getText() + "','"+state_text.getSelectedItem()+"','"+paying_text.getSelectedItem()+"');";
                                                     cause_text.setForeground(Color.red);
                                                     DataBaseMangemet.ExexcuteStatement(sql);
                                                 }    
