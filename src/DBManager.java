@@ -1,21 +1,35 @@
 import javax.swing.*;
+import java.io.File;
 import java.sql.*;
 
 public class DBManager {
     static {
         try {
+            Class.forName("org.sqlite.JDBC");
+        } catch (ClassNotFoundException e) {
+            System.err.println("SQLite Driver notice: " + e.getMessage());
+        }
+        try {
             Class.forName("org.postgresql.Driver");
         } catch (ClassNotFoundException e) {
-            System.err.println("PostgreSQL Driver not found: " + e.getMessage());
+            System.err.println("PostgreSQL Driver notice: " + e.getMessage());
         }
     }
 
     public static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(
-            DBConfig.getJdbcUrl(),
-            DBConfig.getUser(),
-            DBConfig.getPassword()
-        );
+        if (DBConfig.isSqlite()) {
+            File dbFile = new File(DBConfig.getSqlitePath());
+            if (dbFile.getParentFile() != null && !dbFile.getParentFile().exists()) {
+                dbFile.getParentFile().mkdirs();
+            }
+            return DriverManager.getConnection(DBConfig.getJdbcUrl());
+        } else {
+            return DriverManager.getConnection(
+                DBConfig.getJdbcUrl(),
+                DBConfig.getUser(),
+                DBConfig.getPassword()
+            );
+        }
     }
 
     public static boolean testConnection() {
@@ -28,7 +42,95 @@ public class DBManager {
     }
 
     public static void initializeDatabase() {
-        String[] createTableStatements = {
+        if (DBConfig.isSqlite()) {
+            initSqliteSchema();
+        } else {
+            initPostgresSchema();
+        }
+    }
+
+    private static void initSqliteSchema() {
+        String[] stmts = {
+            "CREATE TABLE IF NOT EXISTS users (" +
+            "    id       INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "    FirstN   TEXT    NOT NULL UNIQUE," +
+            "    pass     TEXT    NOT NULL," +
+            "    role     TEXT    DEFAULT 'USER'" +
+            ");",
+
+            "CREATE TABLE IF NOT EXISTS employee (" +
+            "    id_employee    TEXT PRIMARY KEY," +
+            "    nom            TEXT NOT NULL," +
+            "    prenom         TEXT NOT NULL," +
+            "    date_naissance DATE," +
+            "    date_embauche  DATE," +
+            "    date_depart    DATE DEFAULT '2030-12-12'," +
+            "    telephone      TEXT UNIQUE," +
+            "    post           TEXT," +
+            "    salaire        INTEGER," +
+            "    etat           TEXT," +
+            "    activ_emp      INTEGER DEFAULT 1" +
+            ");",
+
+            "CREATE TABLE IF NOT EXISTS date_emp (" +
+            "    date_id       INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "    id_employee   TEXT NOT NULL REFERENCES employee(id_employee) ON DELETE CASCADE," +
+            "    date_embauche DATE NOT NULL," +
+            "    \"date_départ\" DATE DEFAULT '2030-12-12'" +
+            ");",
+
+            "CREATE TABLE IF NOT EXISTS photo_path (" +
+            "    photo_id     INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "    employee_id  TEXT NOT NULL UNIQUE REFERENCES employee(id_employee) ON DELETE CASCADE," +
+            "    path         TEXT NOT NULL" +
+            ");",
+
+            "CREATE TABLE IF NOT EXISTS absences (" +
+            "    absence_id    INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "    id_employee   TEXT NOT NULL REFERENCES employee(id_employee) ON DELETE CASCADE," +
+            "    absence_date  DATE NOT NULL," +
+            "    reason        TEXT," +
+            "    state         TEXT NOT NULL," +
+            "    paying_state  TEXT NOT NULL" +
+            ");",
+
+            "CREATE TABLE IF NOT EXISTS expense (" +
+            "    product_id     INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "    num            INTEGER," +
+            "    product_name   TEXT NOT NULL," +
+            "    product_amount TEXT NOT NULL," +
+            "    product_price  TEXT NOT NULL," +
+            "    total          TEXT NOT NULL," +
+            "    input_date     DATE NOT NULL," +
+            "    name_expenses  TEXT NOT NULL" +
+            ");",
+
+            "CREATE TABLE IF NOT EXISTS activity_log (" +
+            "    log_id      INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "    username    TEXT NOT NULL," +
+            "    action_type TEXT NOT NULL," +
+            "    description TEXT NOT NULL," +
+            "    log_time    TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
+            ");",
+
+            "INSERT OR IGNORE INTO users (FirstN, pass, role) VALUES ('admin', 'admin', 'ADMIN');"
+        };
+
+        try (Connection conn = getConnection(); Statement stmt = conn.createStatement()) {
+            for (String sql : stmts) {
+                try {
+                    stmt.execute(sql);
+                } catch (SQLException ex) {
+                    System.err.println("Notice executing SQLite schema: " + ex.getMessage());
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("SQLite auto-init failed: " + e.getMessage());
+        }
+    }
+
+    private static void initPostgresSchema() {
+        String[] stmts = {
             "CREATE TABLE IF NOT EXISTS users (" +
             "    id     SERIAL       PRIMARY KEY," +
             "    FirstN VARCHAR(50)  NOT NULL UNIQUE," +
@@ -97,15 +199,15 @@ public class DBManager {
         };
 
         try (Connection conn = getConnection(); Statement stmt = conn.createStatement()) {
-            for (String sql : createTableStatements) {
+            for (String sql : stmts) {
                 try {
                     stmt.execute(sql);
                 } catch (SQLException ex) {
-                    System.err.println("Notice executing schema: " + ex.getMessage());
+                    System.err.println("Notice executing PostgreSQL schema: " + ex.getMessage());
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Database auto-init failed: " + e.getMessage());
+            System.err.println("PostgreSQL auto-init failed: " + e.getMessage());
         }
     }
 
@@ -118,7 +220,7 @@ public class DBManager {
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "خطأ في قاعدة البيانات: " + e.getMessage(), "خطأ", JOptionPane.ERROR_MESSAGE);
+            UITheme.showThemedMessage(null, "خطأ في قاعدة البيانات: " + e.getMessage(), "خطأ", JOptionPane.ERROR_MESSAGE);
             return false;
         }
     }
@@ -129,19 +231,8 @@ public class DBManager {
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "خطأ في قاعدة البيانات: " + e.getMessage(), "خطأ", JOptionPane.ERROR_MESSAGE);
+            UITheme.showThemedMessage(null, "خطأ في قاعدة البيانات: " + e.getMessage(), "خطأ", JOptionPane.ERROR_MESSAGE);
             return false;
-        }
-    }
-
-    public static void main(String[] args) {
-        System.out.println("Testing DB Connection...");
-        boolean connected = testConnection();
-        System.out.println("Connection status: " + (connected ? "CONNECTED ✅" : "FAILED ❌"));
-        if (connected) {
-            System.out.println("Initializing Database Schema...");
-            initializeDatabase();
-            System.out.println("Database Schema Initialized Successfully ✅");
         }
     }
 }

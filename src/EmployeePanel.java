@@ -471,7 +471,8 @@ public class EmployeePanel {
         boolean success = DBManager.executeUpdate(updateSql, nom, prenom, birthDate, phone, post, salaire, etat, id);
         if (success) {
             if (!imagePath.isEmpty()) {
-                DBManager.executeUpdate("INSERT INTO photo_path (employee_id, path) VALUES (?, ?) ON CONFLICT (employee_id) DO UPDATE SET path = EXCLUDED.path", id, imagePath);
+                DBManager.executeUpdate("DELETE FROM photo_path WHERE employee_id = ?", id);
+                DBManager.executeUpdate("INSERT INTO photo_path (employee_id, path) VALUES (?, ?)", id, imagePath);
             }
             Action_radio(radio_buttom, g);
             ActivityLogger.log("تعديل موظف", "قام بتعديل بيانات الموظف: " + nom + " " + prenom + " (معرف: " + id + ")");

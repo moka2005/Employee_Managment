@@ -372,9 +372,18 @@ public class MainDashboard {
                 if (rs.next()) todayAbsenceLabel.setText(rs.getString("cnt"));
             }
             String monthPrefix = new SimpleDateFormat("yyyy-MM").format(new Date());
-            try (ResultSet rs = stmt.executeQuery("SELECT coalesce(sum(CAST(total AS INTEGER)), 0) as sm FROM expense WHERE to_char(input_date, 'YYYY-MM') = '" + monthPrefix + "'")) {
-                if (rs.next()) monthlyExpenseLabel.setText(rs.getString("sm") + " DA");
+            int monthlySum = 0;
+            try (ResultSet rs = stmt.executeQuery("SELECT total, input_date FROM expense")) {
+                while (rs.next()) {
+                    String inDate = rs.getString("input_date");
+                    if (inDate != null && inDate.startsWith(monthPrefix)) {
+                        try {
+                            monthlySum += Integer.parseInt(rs.getString("total").replaceAll("[^0-9]", ""));
+                        } catch (Exception ignored) {}
+                    }
+                }
             }
+            monthlyExpenseLabel.setText(monthlySum + " DA");
         } catch (Exception ex) {
             System.err.println("Notice updating KPIs: " + ex.getMessage());
         }

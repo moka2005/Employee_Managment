@@ -317,15 +317,52 @@ public class SettingsPanel {
     }
 
     private void showDBSettingsDialog() {
-        JDialog dialog = new JDialog((Frame) null, "إعدادات الاتصال بقاعدة البيانات", true);
+        JDialog dialog = new JDialog((Frame) null, "إعدادات محرك قاعدة البيانات (Hybrid DB Engine)", true);
         dialog.setLayout(new BorderLayout());
-        dialog.setSize(440, 440);
+        dialog.setSize(480, 520);
         dialog.setLocationRelativeTo(frame);
         dialog.getContentPane().setBackground(UITheme.getBgCard());
 
-        JPanel p = new JPanel(new GridLayout(6, 2, 10, 12));
+        JPanel mainBox = new JPanel(new BorderLayout(10, 15));
+        mainBox.setBackground(UITheme.getBgCard());
+        mainBox.setBorder(new EmptyBorder(20, 20, 20, 20));
+
+        // Engine Selector Radio Buttons
+        JPanel engineCard = new JPanel(new GridLayout(2, 1, 6, 6));
+        engineCard.setOpaque(false);
+        engineCard.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+        engineCard.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createLineBorder(UITheme.getBorderColor(), 1, true),
+            "اختر نوع محرك قاعدة البيانات:",
+            SwingConstants.RIGHT,
+            0,
+            UITheme.FONT_BOLD,
+            UITheme.getTextPrimary()
+        ));
+
+        JRadioButton sqliteRadio = UITheme.createRadioButton("قاعدة بيانات مدمجة (SQLite) - تعمل على أي جهاز فوراً");
+        JRadioButton postgresRadio = UITheme.createRadioButton("خادم شبكة (PostgreSQL Server) - اتصال شبكي/سحابي");
+        ButtonGroup bg = new ButtonGroup();
+        bg.add(sqliteRadio);
+        bg.add(postgresRadio);
+
+        if (DBConfig.isSqlite()) {
+            sqliteRadio.setSelected(true);
+        } else {
+            postgresRadio.setSelected(true);
+        }
+
+        engineCard.add(sqliteRadio);
+        engineCard.add(postgresRadio);
+        mainBox.add(engineCard, BorderLayout.NORTH);
+
+        // Parameters Form
+        JPanel p = new JPanel(new GridLayout(6, 2, 10, 10));
         p.setBackground(UITheme.getBgCard());
-        p.setBorder(new EmptyBorder(20, 20, 20, 20));
+        p.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+
+        JTextField sqlitePathField = UITheme.createTextField(10);
+        sqlitePathField.setText(DBConfig.getSqlitePath());
 
         JTextField hostField = UITheme.createTextField(10);
         hostField.setText(DBConfig.getHost());
@@ -342,7 +379,9 @@ public class SettingsPanel {
         JPasswordField pField = UITheme.createPasswordField(10);
         pField.setText(DBConfig.getPassword());
 
-        p.add(UITheme.createFieldLabel("خادم القاعدة (Host):"));
+        p.add(UITheme.createFieldLabel("مسار ملف SQLite:"));
+        p.add(sqlitePathField);
+        p.add(UITheme.createFieldLabel("خادم PostgreSQL (Host):"));
         p.add(hostField);
         p.add(UITheme.createFieldLabel("المنفذ (Port):"));
         p.add(portField);
@@ -353,21 +392,46 @@ public class SettingsPanel {
         p.add(UITheme.createFieldLabel("كلمة المرور (Password):"));
         p.add(pField);
 
+        Runnable updateFieldsState = () -> {
+            boolean isPg = postgresRadio.isSelected();
+            sqlitePathField.setEnabled(!isPg);
+            hostField.setEnabled(isPg);
+            portField.setEnabled(isPg);
+            nameField.setEnabled(isPg);
+            uField.setEnabled(isPg);
+            pField.setEnabled(isPg);
+        };
+        sqliteRadio.addActionListener(e -> updateFieldsState.run());
+        postgresRadio.addActionListener(e -> updateFieldsState.run());
+        updateFieldsState.run();
+
+        mainBox.add(p, BorderLayout.CENTER);
+
+        // Bottom Actions
         JButton testBtn = UITheme.createSecondaryButton("اختبار الاتصال", null);
         testBtn.addActionListener(e -> {
-            DBConfig.update(hostField.getText(), portField.getText(), nameField.getText(), uField.getText(), new String(pField.getPassword()));
+            if (sqliteRadio.isSelected()) {
+                DBConfig.updateSqlite(sqlitePathField.getText().trim());
+            } else {
+                DBConfig.updatePostgres(hostField.getText(), portField.getText(), nameField.getText(), uField.getText(), new String(pField.getPassword()));
+            }
             if (DBManager.testConnection()) {
-                UITheme.showThemedMessage(dialog, "✅ تم الاتصال بنجاح!", "نجاح", JOptionPane.INFORMATION_MESSAGE);
+                UITheme.showThemedMessage(dialog, "✅ تم الاتصال بنجاح بمحرك: " + DBConfig.getDbType(), "نجاح الاتصال", JOptionPane.INFORMATION_MESSAGE);
             } else {
                 UITheme.showThemedMessage(dialog, "❌ فشل الاتصال بقاعدة البيانات!", "خطأ", JOptionPane.ERROR_MESSAGE);
             }
         });
 
-        JButton saveBtn = UITheme.createPrimaryButton("حفظ وإغلاق", null);
+        JButton saveBtn = UITheme.createPrimaryButton("حفظ وتطبيق", null);
         saveBtn.addActionListener(e -> {
-            DBConfig.update(hostField.getText(), portField.getText(), nameField.getText(), uField.getText(), new String(pField.getPassword()));
+            if (sqliteRadio.isSelected()) {
+                DBConfig.updateSqlite(sqlitePathField.getText().trim());
+            } else {
+                DBConfig.updatePostgres(hostField.getText(), portField.getText(), nameField.getText(), uField.getText(), new String(pField.getPassword()));
+            }
             DBManager.initializeDatabase();
             dialog.dispose();
+            UITheme.showThemedMessage(frame, "تم حفظ الإعدادات وتهيئة قاعدة البيانات بنجاح!", "تم بنجاح", JOptionPane.INFORMATION_MESSAGE);
         });
 
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
@@ -375,7 +439,7 @@ public class SettingsPanel {
         btnPanel.add(testBtn);
         btnPanel.add(saveBtn);
 
-        dialog.add(p, BorderLayout.CENTER);
+        dialog.add(mainBox, BorderLayout.CENTER);
         dialog.add(btnPanel, BorderLayout.SOUTH);
         dialog.setVisible(true);
     }

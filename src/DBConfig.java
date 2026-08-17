@@ -12,7 +12,11 @@ public class DBConfig {
     public static void loadConfig() {
         File file = new File(CONFIG_FILE);
         if (!file.exists()) {
-            // Default configuration
+            // Default configuration: Embedded SQLite for instant zero-config on any machine!
+            props.setProperty("db.type", "SQLITE");
+            props.setProperty("db.sqlite.path", "database.db");
+
+            // PostgreSQL defaults (optional for network mode)
             props.setProperty("db.host", "localhost");
             props.setProperty("db.port", "5432");
             props.setProperty("db.name", "Employee_Managment");
@@ -30,10 +34,26 @@ public class DBConfig {
 
     public static void saveConfig() {
         try (OutputStream out = new FileOutputStream(CONFIG_FILE)) {
-            props.store(out, "Database Connection Settings for Employee Management System");
+            props.store(out, "Hybrid Database Configuration (SQLITE Embedded / POSTGRESQL Network)");
         } catch (IOException e) {
             System.err.println("Failed to save db.properties: " + e.getMessage());
         }
+    }
+
+    public static String getDbType() {
+        return props.getProperty("db.type", "SQLITE").toUpperCase().trim();
+    }
+
+    public static boolean isSqlite() {
+        return "SQLITE".equalsIgnoreCase(getDbType());
+    }
+
+    public static boolean isPostgres() {
+        return "POSTGRESQL".equalsIgnoreCase(getDbType()) || "POSTGRES".equalsIgnoreCase(getDbType());
+    }
+
+    public static String getSqlitePath() {
+        return props.getProperty("db.sqlite.path", "database.db");
     }
 
     public static String getHost() {
@@ -57,15 +77,26 @@ public class DBConfig {
     }
 
     public static String getJdbcUrl() {
-        return "jdbc:postgresql://" + getHost() + ":" + getPort() + "/" + getDbName();
+        if (isSqlite()) {
+            return "jdbc:sqlite:" + getSqlitePath();
+        } else {
+            return "jdbc:postgresql://" + getHost() + ":" + getPort() + "/" + getDbName();
+        }
     }
 
-    public static void update(String host, String port, String dbName, String user, String password) {
+    public static void updatePostgres(String host, String port, String dbName, String user, String password) {
+        props.setProperty("db.type", "POSTGRESQL");
         props.setProperty("db.host", host);
         props.setProperty("db.port", port);
         props.setProperty("db.name", dbName);
         props.setProperty("db.user", user);
         props.setProperty("db.password", password);
+        saveConfig();
+    }
+
+    public static void updateSqlite(String sqlitePath) {
+        props.setProperty("db.type", "SQLITE");
+        props.setProperty("db.sqlite.path", sqlitePath != null && !sqlitePath.isEmpty() ? sqlitePath : "database.db");
         saveConfig();
     }
 }
