@@ -35,9 +35,9 @@ public class AttendancePanel {
     public AttendancePanel(CardLayout cardLayout, JPanel cardPanel) {
         AttendancePanel.cardLayout = cardLayout;
         AttendancePanel.cardPanel = cardPanel;
-        frame = new JPanel(new BorderLayout(15, 15));
+        frame = new JPanel(new BorderLayout(10, 10));
         frame.setBackground(UITheme.getBgMain());
-        frame.setBorder(new EmptyBorder(15, 15, 15, 15));
+        frame.setBorder(new EmptyBorder(8, 10, 8, 10));
 
         buildUI();
     }
@@ -45,7 +45,7 @@ public class AttendancePanel {
     private void buildUI() {
         // TOP Header Card
         JPanel topCard = UITheme.createCard();
-        topCard.setLayout(new BorderLayout(15, 0));
+        topCard.setLayout(new BorderLayout(10, 0));
 
         JLabel titleLabel = new JLabel("تسجيل الحضور والغياب اليومي", SwingConstants.RIGHT);
         titleLabel.setFont(UITheme.FONT_TITLE);
@@ -60,7 +60,7 @@ public class AttendancePanel {
         searchIcon.setFont(UITheme.FONT_BOLD);
         searchIcon.setForeground(UITheme.getTextPrimary());
         searchIcon.setHorizontalTextPosition(SwingConstants.LEFT);
-        searchField = UITheme.createTextField(15);
+        searchField = UITheme.createTextField(14);
         searchField.getDocument().addDocumentListener(new DocumentListener() {
             @Override public void insertUpdate(DocumentEvent e) { applyFilter(); }
             @Override public void removeUpdate(DocumentEvent e) { applyFilter(); }
@@ -82,21 +82,21 @@ public class AttendancePanel {
         frame.add(topCard, BorderLayout.NORTH);
 
         // CENTER: Left Form + Right Employee Table
-        JPanel centerPanel = new JPanel(new BorderLayout(15, 15));
+        JPanel centerPanel = new JPanel(new BorderLayout(10, 10));
         centerPanel.setOpaque(false);
 
         // Left Form Card
         JPanel formCard = UITheme.createCard();
-        formCard.setLayout(new BorderLayout(10, 15));
-        formCard.setPreferredSize(new Dimension(380, 0));
+        formCard.setLayout(new BorderLayout(8, 10));
+        formCard.setPreferredSize(new Dimension(310, 0));
 
         // Photo Preview
         photoPanel = new ProfilePhotoPanel();
-        photoPanel.setPreferredSize(new Dimension(140, 140));
+        photoPanel.setPreferredSize(new Dimension(110, 110));
         formCard.add(photoPanel, BorderLayout.NORTH);
 
         // Inputs Grid
-        JPanel formGrid = new JPanel(new GridLayout(6, 2, 8, 10));
+        JPanel formGrid = new JPanel(new GridLayout(6, 2, 6, 6));
         formGrid.setOpaque(false);
         formGrid.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 

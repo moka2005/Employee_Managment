@@ -100,9 +100,9 @@ public class EmployeePanel {
     public EmployeePanel(CardLayout a, JPanel b) {
         cardLayout = a;
         cardPanel = b;
-        frame = new JPanel(new BorderLayout(15, 15));
+        frame = new JPanel(new BorderLayout(10, 10));
         frame.setBackground(UITheme.getBgMain());
-        frame.setBorder(new EmptyBorder(15, 15, 15, 15));
+        frame.setBorder(new EmptyBorder(8, 10, 8, 10));
 
         buildUI();
     }
@@ -110,7 +110,7 @@ public class EmployeePanel {
     private void buildUI() {
         // TOP Header Card
         JPanel topCard = UITheme.createCard();
-        topCard.setLayout(new BorderLayout(15, 0));
+        topCard.setLayout(new BorderLayout(10, 0));
 
         JLabel titleLabel = new JLabel("إدارة العمال والموظفين", SwingConstants.RIGHT);
         titleLabel.setFont(UITheme.FONT_TITLE);
@@ -125,7 +125,7 @@ public class EmployeePanel {
         searchIcon.setFont(UITheme.FONT_BOLD);
         searchIcon.setForeground(UITheme.getTextPrimary());
         searchIcon.setHorizontalTextPosition(SwingConstants.LEFT);
-        searchField = UITheme.createTextField(16);
+        searchField = UITheme.createTextField(14);
         searchField.setToolTipText("ابحث بالاسم، اللقب، رقم الهاتف، أو رقم التعريف");
         searchField.getDocument().addDocumentListener(new DocumentListener() {
             @Override public void insertUpdate(DocumentEvent e) { applyFilter(); }
@@ -151,21 +151,21 @@ public class EmployeePanel {
         frame.add(topCard, BorderLayout.NORTH);
 
         // CENTER: Left Form + Right/Center Table
-        JPanel centerContent = new JPanel(new BorderLayout(15, 15));
+        JPanel centerContent = new JPanel(new BorderLayout(10, 10));
         centerContent.setOpaque(false);
 
         // Left Panel (Form + Photo)
         JPanel leftFormCard = UITheme.createCard();
-        leftFormCard.setLayout(new BorderLayout(10, 10));
-        leftFormCard.setPreferredSize(new Dimension(380, 0));
+        leftFormCard.setLayout(new BorderLayout(8, 8));
+        leftFormCard.setPreferredSize(new Dimension(310, 0));
 
         // Photo Preview on top of Form
-        JPanel photoContainer = new JPanel(new BorderLayout(0, 8));
+        JPanel photoContainer = new JPanel(new BorderLayout(0, 6));
         photoContainer.setOpaque(false);
-        profil_icon.setPreferredSize(new Dimension(150, 150));
+        profil_icon.setPreferredSize(new Dimension(110, 110));
         photoContainer.add(profil_icon, BorderLayout.CENTER);
 
-        JButton uploadBtn = UITheme.createSecondaryButton("رفع صورة الموظف", IconHelper.getIcon("addicon.png", 16, 16));
+        JButton uploadBtn = UITheme.createSecondaryButton("رفع صورة الموظف", IconHelper.getIcon("addicon.png", 14, 14));
         uploadBtn.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser();
             chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("صور", "jpg", "jpeg", "png", "gif"));
@@ -178,7 +178,7 @@ public class EmployeePanel {
         leftFormCard.add(photoContainer, BorderLayout.NORTH);
 
         // Form Fields Grid
-        JPanel formGrid = new JPanel(new GridLayout(8, 2, 8, 8));
+        JPanel formGrid = new JPanel(new GridLayout(8, 2, 6, 4));
         formGrid.setOpaque(false);
         formGrid.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 
@@ -204,7 +204,7 @@ public class EmployeePanel {
         etatCombo = new JComboBox<>(new String[]{"أعزب", "متزوج"});
         UITheme.styleComboBox(etatCombo);
 
-        formGrid.add(UITheme.createFieldLabel("رقم التعريف الوطني (9 أرقام):"));
+        formGrid.add(UITheme.createFieldLabel("رقم التعريف (9 أرقام):"));
         formGrid.add(idField);
 
         formGrid.add(UITheme.createFieldLabel("الإسم:"));
@@ -232,12 +232,12 @@ public class EmployeePanel {
         centerContent.add(leftFormCard, BorderLayout.WEST);
 
         // Right / Center Panel: Table + Radio Filter + Action Buttons
-        JPanel rightTablePanel = new JPanel(new BorderLayout(10, 10));
+        JPanel rightTablePanel = new JPanel(new BorderLayout(8, 8));
         rightTablePanel.setOpaque(false);
 
         // Radio Buttons Filter Card
         JPanel radioCard = UITheme.createCard();
-        radioCard.setLayout(new FlowLayout(FlowLayout.RIGHT, 25, 0));
+        radioCard.setLayout(new FlowLayout(FlowLayout.RIGHT, 20, 0));
         radioCard.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 
         String[] radioTitles = {"كل الموظفين", "الموظفين الحاليين", "الموظفين السابقين"};
@@ -268,6 +268,14 @@ public class EmployeePanel {
 
         table = new JTable(model);
         UITheme.styleTable(table);
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+
+        // Set optimized column widths so headers never get truncated
+        int[] colWidths = {105, 80, 80, 85, 85, 85, 90, 70, 80, 65};
+        for (int i = 0; i < colWidths.length && i < table.getColumnModel().getColumnCount(); i++) {
+            table.getColumnModel().getColumn(i).setPreferredWidth(colWidths[i]);
+        }
+
         sorter = new TableRowSorter<>(model);
         table.setRowSorter(sorter);
 
@@ -303,18 +311,18 @@ public class EmployeePanel {
         JScrollPane scrollPane = UITheme.createScrollPane(table);
         rightTablePanel.add(scrollPane, BorderLayout.CENTER);
 
-        // Action Buttons Bar
+        // Action Buttons Bar - Structured into 2 clean rows that never get clipped
         JPanel actionCard = UITheme.createCard();
-        actionCard.setLayout(new FlowLayout(FlowLayout.CENTER, 8, 5));
-        actionCard.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+        actionCard.setLayout(new GridLayout(2, 1, 0, 4));
+        actionCard.setBorder(new EmptyBorder(6, 8, 6, 8));
 
-        JButton addBtn = UITheme.createPrimaryButton("موظف جديد", IconHelper.getIcon("include.png", 16, 16));
-        JButton editBtn = UITheme.createSuccessButton("تعديل وحفظ", IconHelper.getIcon("edit.png", 16, 16));
-        JButton reactivateBtn = UITheme.createButton("إعادة تفعيل الموظف", IconHelper.getIcon("check.png", 16, 16), new Color(16, 185, 129), Color.WHITE);
-        JButton deleteBtn = UITheme.createDangerButton("إنهاء خدمة / حذف", IconHelper.getIcon("delete.png", 16, 16));
-        JButton clearBtn = UITheme.createSecondaryButton("إفراغ الخانات", IconHelper.getIcon("empty.png", 16, 16));
-        JButton exportBtn = UITheme.createButton("تصدير Excel", IconHelper.getIcon("excel.png", 16, 16), new Color(16, 185, 129), Color.WHITE);
-        JButton printBtn = UITheme.createButton("طباعة القائمة", IconHelper.getIcon("print.png", 16, 16), new Color(99, 102, 241), Color.WHITE);
+        JButton addBtn = UITheme.createPrimaryButton("موظف جديد", IconHelper.getIcon("include.png", 14, 14));
+        JButton editBtn = UITheme.createSuccessButton("تعديل وحفظ", IconHelper.getIcon("edit.png", 14, 14));
+        JButton reactivateBtn = UITheme.createButton("إعادة تفعيل الموظف", IconHelper.getIcon("check.png", 14, 14), new Color(16, 185, 129), Color.WHITE);
+        JButton deleteBtn = UITheme.createDangerButton("إنهاء خدمة / حذف", IconHelper.getIcon("delete.png", 14, 14));
+        JButton clearBtn = UITheme.createSecondaryButton("إفراغ الخانات", IconHelper.getIcon("empty.png", 14, 14));
+        JButton exportBtn = UITheme.createButton("تصدير Excel", IconHelper.getIcon("excel.png", 14, 14), new Color(16, 185, 129), Color.WHITE);
+        JButton printBtn = UITheme.createButton("طباعة القائمة", IconHelper.getIcon("print.png", 14, 14), new Color(99, 102, 241), Color.WHITE);
 
         addBtn.addActionListener(e -> addEmployee());
         editBtn.addActionListener(e -> updateEmployee());
@@ -324,13 +332,25 @@ public class EmployeePanel {
         exportBtn.addActionListener(e -> ExcelExporter.exportTable(table, "قائمة_العمال.xlsx", "العمال"));
         printBtn.addActionListener(e -> printTable());
 
-        actionCard.add(addBtn);
-        actionCard.add(editBtn);
-        actionCard.add(reactivateBtn);
-        actionCard.add(deleteBtn);
-        actionCard.add(clearBtn);
-        actionCard.add(exportBtn);
-        actionCard.add(printBtn);
+        // Row 1: Core CRUD Operations
+        JPanel row1 = new JPanel(new FlowLayout(FlowLayout.CENTER, 6, 0));
+        row1.setOpaque(false);
+        row1.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+        row1.add(addBtn);
+        row1.add(editBtn);
+        row1.add(reactivateBtn);
+        row1.add(deleteBtn);
+
+        // Row 2: Secondary / Tool Actions
+        JPanel row2 = new JPanel(new FlowLayout(FlowLayout.CENTER, 6, 0));
+        row2.setOpaque(false);
+        row2.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+        row2.add(clearBtn);
+        row2.add(exportBtn);
+        row2.add(printBtn);
+
+        actionCard.add(row1);
+        actionCard.add(row2);
 
         rightTablePanel.add(actionCard, BorderLayout.SOUTH);
         centerContent.add(rightTablePanel, BorderLayout.CENTER);

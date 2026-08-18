@@ -27,14 +27,14 @@ public class UITheme {
     public static final Color INFO = new Color(6, 182, 212);          // #06B6D4 Cyan
     public static final Color PURPLE = new Color(139, 92, 246);       // #8B5CF6
 
-    // Fonts
-    public static final Font FONT_HERO = new Font("Segoe UI", Font.BOLD, 24);
-    public static final Font FONT_TITLE = new Font("Segoe UI", Font.BOLD, 20);
-    public static final Font FONT_SUBTITLE = new Font("Segoe UI", Font.BOLD, 16);
-    public static final Font FONT_BOLD = new Font("Segoe UI", Font.BOLD, 14);
-    public static final Font FONT_REGULAR = new Font("Segoe UI", Font.PLAIN, 14);
-    public static final Font FONT_SMALL = new Font("Segoe UI", Font.PLAIN, 12);
-    public static final Font FONT_SMALL_BOLD = new Font("Segoe UI", Font.BOLD, 12);
+    // Fonts - Optimized for crisp display on standard HD (1366x768) and Full HD
+    public static final Font FONT_HERO = new Font("Segoe UI", Font.BOLD, 22);
+    public static final Font FONT_TITLE = new Font("Segoe UI", Font.BOLD, 17);
+    public static final Font FONT_SUBTITLE = new Font("Segoe UI", Font.BOLD, 15);
+    public static final Font FONT_BOLD = new Font("Segoe UI", Font.BOLD, 13);
+    public static final Font FONT_REGULAR = new Font("Segoe UI", Font.PLAIN, 13);
+    public static final Font FONT_SMALL = new Font("Segoe UI", Font.PLAIN, 11);
+    public static final Font FONT_SMALL_BOLD = new Font("Segoe UI", Font.BOLD, 11);
 
     // Dynamic Theme Color Getters
     public static Color getBgMain() {
@@ -129,8 +129,8 @@ public class UITheme {
         btn.setBorderPainted(false);
         btn.setOpaque(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.setBorder(new EmptyBorder(8, 16, 8, 16));
-        btn.setIconTextGap(8);
+        btn.setBorder(new EmptyBorder(6, 12, 6, 12));
+        btn.setIconTextGap(6);
         return btn;
     }
 
@@ -159,14 +159,14 @@ public class UITheme {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(getBgCard());
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 14, 14);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
                 g2.setColor(getBorderColor());
-                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 14, 14);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 12, 12);
                 g2.dispose();
             }
         };
         card.setOpaque(false);
-        card.setBorder(new EmptyBorder(15, 15, 15, 15));
+        card.setBorder(new EmptyBorder(10, 12, 10, 12));
         return card;
     }
 
@@ -203,9 +203,9 @@ public class UITheme {
         tf.setCaretColor(ThemeManager.isDarkMode() ? new Color(56, 189, 248) : PRIMARY);
         tf.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(getBorderColor(), 1, true),
-            BorderFactory.createEmptyBorder(6, 10, 6, 10)
+            BorderFactory.createEmptyBorder(4, 8, 4, 8)
         ));
-        tf.setPreferredSize(new Dimension(tf.getPreferredSize().width, 38));
+        tf.setPreferredSize(new Dimension(tf.getPreferredSize().width, 34));
         return tf;
     }
 
@@ -544,7 +544,7 @@ public class UITheme {
     // ==========================================
     public static void styleTable(JTable table) {
         table.setFont(FONT_REGULAR);
-        table.setRowHeight(40);
+        table.setRowHeight(32);
         table.setShowGrid(false);
         table.setIntercellSpacing(new Dimension(0, 0));
         table.setSelectionBackground(ThemeManager.isDarkMode() ? new Color(55, 48, 163) : new Color(224, 231, 255));
@@ -554,7 +554,7 @@ public class UITheme {
 
         JTableHeader header = table.getTableHeader();
         header.setFont(FONT_BOLD);
-        header.setPreferredSize(new Dimension(0, 44));
+        header.setPreferredSize(new Dimension(0, 36));
         header.setReorderingAllowed(false);
         header.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 

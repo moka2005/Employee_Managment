@@ -32,9 +32,9 @@ public class WageFlowPanel {
     public WageFlowPanel(CardLayout cardLayout, JPanel cardPanel) {
         WageFlowPanel.cardLayout = cardLayout;
         WageFlowPanel.cardPanel = cardPanel;
-        frame = new JPanel(new BorderLayout(15, 15));
+        frame = new JPanel(new BorderLayout(10, 10));
         frame.setBackground(UITheme.getBgMain());
-        frame.setBorder(new EmptyBorder(15, 15, 15, 15));
+        frame.setBorder(new EmptyBorder(8, 10, 8, 10));
 
         buildUI();
     }
@@ -42,7 +42,7 @@ public class WageFlowPanel {
     private void buildUI() {
         // TOP Header Card
         JPanel topCard = UITheme.createCard();
-        topCard.setLayout(new BorderLayout(15, 0));
+        topCard.setLayout(new BorderLayout(10, 0));
 
         JLabel titleLabel = new JLabel("متابعة الحضور، الغيابات وتسوية الأجور", SwingConstants.RIGHT);
         titleLabel.setFont(UITheme.FONT_TITLE);
@@ -54,7 +54,7 @@ public class WageFlowPanel {
 
         JLabel selectLabel = UITheme.createFieldLabel("اختر الموظف:");
         UITheme.styleComboBox(id_combo);
-        id_combo.setPreferredSize(new Dimension(260, 38));
+        id_combo.setPreferredSize(new Dimension(240, 34));
         id_combo.addActionListener(e -> {
             loadSelectedEmployeeData();
             update(true);
@@ -68,20 +68,20 @@ public class WageFlowPanel {
         frame.add(topCard, BorderLayout.NORTH);
 
         // CENTER: Left Sidebar + Right Records Table
-        JPanel centerPanel = new JPanel(new BorderLayout(15, 15));
+        JPanel centerPanel = new JPanel(new BorderLayout(10, 10));
         centerPanel.setOpaque(false);
 
         // Left Financial Settlement Card
         JPanel leftCard = UITheme.createCard();
-        leftCard.setLayout(new BorderLayout(10, 15));
-        leftCard.setPreferredSize(new Dimension(360, 0));
+        leftCard.setLayout(new BorderLayout(8, 10));
+        leftCard.setPreferredSize(new Dimension(310, 0));
 
         // Photo & Info
-        JPanel infoBox = new JPanel(new BorderLayout(0, 10));
+        JPanel infoBox = new JPanel(new BorderLayout(0, 6));
         infoBox.setOpaque(false);
 
         photoPanel = new ProfilePhotoPanel();
-        photoPanel.setPreferredSize(new Dimension(140, 140));
+        photoPanel.setPreferredSize(new Dimension(110, 110));
         infoBox.add(photoPanel, BorderLayout.CENTER);
 
         empDetailsLabel = new JLabel("الموظف: -", SwingConstants.CENTER);
