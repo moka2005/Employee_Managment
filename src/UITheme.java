@@ -1,4 +1,7 @@
 import com.toedter.calendar.JDateChooser;
+import com.toedter.calendar.JDayChooser;
+import com.toedter.calendar.JMonthChooser;
+import com.toedter.calendar.JYearChooser;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.basic.BasicComboBoxUI;
@@ -7,6 +10,12 @@ import javax.swing.plaf.basic.ComboPopup;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.Calendar;
+import java.util.Date;
 
 public class UITheme {
     // Brand Accents
@@ -33,7 +42,11 @@ public class UITheme {
     }
 
     public static Color getBgSidebar() {
-        return new Color(15, 23, 42); // Sleek deep slate
+        return ThemeManager.isDarkMode() ? new Color(15, 23, 42) : Color.WHITE; // #0F172A vs #FFFFFF
+    }
+
+    public static Color getBgTopBar() {
+        return ThemeManager.isDarkMode() ? new Color(15, 23, 42) : Color.WHITE; // #0F172A vs #FFFFFF
     }
 
     public static Color getBgCard() {
@@ -162,15 +175,31 @@ public class UITheme {
             @Override
             public void updateUI() {
                 super.updateUI();
-                setBackground(getBgInput());
-                setForeground(getTextPrimary());
+                setBackground(isEditable() && isEnabled() ? getBgInput() : getBgCardSecondary());
+                setForeground(isEnabled() ? getTextPrimary() : getTextSecondary());
+                setDisabledTextColor(getTextSecondary());
                 setCaretColor(ThemeManager.isDarkMode() ? new Color(56, 189, 248) : PRIMARY);
+            }
+
+            @Override
+            public void setEditable(boolean b) {
+                super.setEditable(b);
+                setBackground(b && isEnabled() ? getBgInput() : getBgCardSecondary());
+                setForeground(isEnabled() ? getTextPrimary() : getTextSecondary());
+            }
+
+            @Override
+            public void setEnabled(boolean enabled) {
+                super.setEnabled(enabled);
+                setBackground(isEditable() && enabled ? getBgInput() : getBgCardSecondary());
+                setForeground(enabled ? getTextPrimary() : getTextSecondary());
             }
         };
         tf.setFont(FONT_REGULAR);
         tf.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         tf.setBackground(getBgInput());
         tf.setForeground(getTextPrimary());
+        tf.setDisabledTextColor(getTextSecondary());
         tf.setCaretColor(ThemeManager.isDarkMode() ? new Color(56, 189, 248) : PRIMARY);
         tf.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(getBorderColor(), 1, true),
@@ -185,15 +214,29 @@ public class UITheme {
             @Override
             public void updateUI() {
                 super.updateUI();
-                setBackground(getBgInput());
-                setForeground(getTextPrimary());
+                setBackground(isEditable() && isEnabled() ? getBgInput() : getBgCardSecondary());
+                setForeground(isEnabled() ? getTextPrimary() : getTextSecondary());
+                setDisabledTextColor(getTextSecondary());
                 setCaretColor(ThemeManager.isDarkMode() ? new Color(56, 189, 248) : PRIMARY);
+            }
+
+            @Override
+            public void setEditable(boolean b) {
+                super.setEditable(b);
+                setBackground(b && isEnabled() ? getBgInput() : getBgCardSecondary());
+            }
+
+            @Override
+            public void setEnabled(boolean enabled) {
+                super.setEnabled(enabled);
+                setBackground(isEditable() && enabled ? getBgInput() : getBgCardSecondary());
             }
         };
         pf.setFont(FONT_REGULAR);
         pf.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         pf.setBackground(getBgInput());
         pf.setForeground(getTextPrimary());
+        pf.setDisabledTextColor(getTextSecondary());
         pf.setCaretColor(ThemeManager.isDarkMode() ? new Color(56, 189, 248) : PRIMARY);
         pf.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(getBorderColor(), 1, true),
@@ -307,6 +350,7 @@ public class UITheme {
                     protected JScrollPane createScroller() {
                         JScrollPane scroller = super.createScroller();
                         scroller.setBorder(BorderFactory.createLineBorder(getBorderColor(), 1));
+                        scroller.getViewport().setBackground(getBgCard());
                         return scroller;
                     }
                 };
@@ -365,6 +409,7 @@ public class UITheme {
             tf.setFont(FONT_REGULAR);
             tf.setBackground(getBgInput());
             tf.setForeground(getTextPrimary());
+            tf.setDisabledTextColor(getTextSecondary());
             tf.setCaretColor(ThemeManager.isDarkMode() ? new Color(56, 189, 248) : PRIMARY);
             tf.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 8));
             tf.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
@@ -373,7 +418,7 @@ public class UITheme {
         JButton calBtn = dateChooser.getCalendarButton();
         if (calBtn != null) {
             calBtn.setBackground(getBgInput());
-            calBtn.setBorder(BorderFactory.createEmptyBorder(2, 4, 2, 4));
+            calBtn.setBorder(BorderFactory.createEmptyBorder(2, 6, 2, 6));
             calBtn.setContentAreaFilled(false);
             calBtn.setFocusPainted(false);
             calBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -388,56 +433,108 @@ public class UITheme {
     public static void styleJCalendar(com.toedter.calendar.JCalendar jcal) {
         if (jcal == null) return;
         Color bg = getBgCard();
+        Color bgSec = getBgCardSecondary();
         Color fg = getTextPrimary();
 
         jcal.setBackground(bg);
         jcal.setFont(FONT_REGULAR);
+        jcal.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(getBorderColor(), 1, true),
+            BorderFactory.createEmptyBorder(6, 6, 6, 6)
+        ));
 
-        if (jcal.getDayChooser() != null) {
-            jcal.getDayChooser().setBackground(bg);
-            jcal.getDayChooser().setWeekOfYearVisible(false);
-            jcal.getDayChooser().setAlwaysFireDayProperty(true);
-            jcal.getDayChooser().setDecorationBackgroundColor(getBgCardSecondary());
-            jcal.getDayChooser().setWeekdayForeground(ThemeManager.isDarkMode() ? new Color(56, 189, 248) : PRIMARY);
-            jcal.getDayChooser().setSundayForeground(DANGER);
-
-            JPanel dayPanel = jcal.getDayChooser().getDayPanel();
-            if (dayPanel != null) {
-                dayPanel.setBackground(bg);
-                for (Component c : dayPanel.getComponents()) {
-                    if (c instanceof JButton) {
-                        JButton b = (JButton) c;
-                        b.setBackground(bg);
-                        b.setForeground(fg);
-                        b.setFont(FONT_SMALL_BOLD);
-                        b.setFocusPainted(false);
-                        b.setContentAreaFilled(false);
-                        b.setOpaque(true);
-                        b.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
-                    }
-                }
-            }
-        }
-
-        if (jcal.getMonthChooser() != null) {
-            jcal.getMonthChooser().setBackground(bg);
-            Component mComp = jcal.getMonthChooser().getComboBox();
+        // Month Chooser
+        JMonthChooser monthChooser = jcal.getMonthChooser();
+        if (monthChooser != null) {
+            monthChooser.setBackground(bg);
+            Component mComp = monthChooser.getComboBox();
             if (mComp instanceof JComboBox) {
                 styleComboBox((JComboBox<?>) mComp);
             }
         }
 
-        if (jcal.getYearChooser() != null) {
-            jcal.getYearChooser().setBackground(bg);
-            JSpinner spinner = (JSpinner) jcal.getYearChooser().getSpinner();
+        // Year Chooser
+        JYearChooser yearChooser = jcal.getYearChooser();
+        if (yearChooser != null) {
+            yearChooser.setBackground(bg);
+            JSpinner spinner = (JSpinner) yearChooser.getSpinner();
             if (spinner != null) {
                 spinner.setBackground(bg);
                 spinner.setForeground(fg);
+                spinner.setBorder(BorderFactory.createLineBorder(getBorderColor(), 1, true));
                 JComponent editor = spinner.getEditor();
                 if (editor instanceof JSpinner.DefaultEditor) {
-                    ((JSpinner.DefaultEditor) editor).getTextField().setBackground(bg);
-                    ((JSpinner.DefaultEditor) editor).getTextField().setForeground(fg);
+                    JTextField tf = ((JSpinner.DefaultEditor) editor).getTextField();
+                    tf.setBackground(getBgInput());
+                    tf.setForeground(fg);
+                    tf.setFont(FONT_BOLD);
                 }
+            }
+        }
+
+        // Day Chooser
+        JDayChooser dayChooser = jcal.getDayChooser();
+        if (dayChooser != null) {
+            dayChooser.setBackground(bg);
+            dayChooser.setWeekOfYearVisible(false);
+            dayChooser.setAlwaysFireDayProperty(true);
+            dayChooser.setDecorationBackgroundColor(bgSec);
+            dayChooser.setDecorationBordersVisible(false);
+            dayChooser.setDayBordersVisible(false);
+            dayChooser.setWeekdayForeground(ThemeManager.isDarkMode() ? new Color(56, 189, 248) : PRIMARY);
+            dayChooser.setSundayForeground(DANGER);
+
+            Runnable restyleDays = () -> {
+                Color currentBg = getBgCard();
+                Color currentFg = getTextPrimary();
+                Color currentSelBg = PRIMARY;
+
+                JPanel dayPanel = dayChooser.getDayPanel();
+                if (dayPanel != null) {
+                    dayPanel.setBackground(currentBg);
+                    for (Component c : dayPanel.getComponents()) {
+                        if (c instanceof JButton) {
+                            JButton b = (JButton) c;
+                            String text = b.getText().trim();
+                            b.setFont(FONT_SMALL_BOLD);
+                            b.setFocusPainted(false);
+                            b.setContentAreaFilled(true);
+                            b.setOpaque(true);
+                            b.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+                            // Check if this button is the selected day
+                            Calendar cal = jcal.getCalendar();
+                            int selDay = cal.get(Calendar.DAY_OF_MONTH);
+                            boolean isSelected = false;
+                            try {
+                                if (!text.isEmpty() && Integer.parseInt(text) == selDay && b.isEnabled()) {
+                                    isSelected = true;
+                                }
+                            } catch (Exception ignored) {}
+
+                            if (isSelected) {
+                                b.setBackground(currentSelBg);
+                                b.setForeground(Color.WHITE);
+                                b.setBorder(BorderFactory.createLineBorder(currentSelBg, 1, true));
+                            } else {
+                                b.setBackground(currentBg);
+                                b.setForeground(currentFg);
+                                b.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
+                            }
+                        }
+                    }
+                }
+            };
+
+            // Re-style immediately and listen to updates
+            restyleDays.run();
+
+            dayChooser.addPropertyChangeListener("day", evt -> restyleDays.run());
+            if (monthChooser != null) {
+                monthChooser.addPropertyChangeListener("month", evt -> restyleDays.run());
+            }
+            if (yearChooser != null) {
+                yearChooser.addPropertyChangeListener("year", evt -> restyleDays.run());
             }
         }
     }
@@ -496,12 +593,12 @@ public class UITheme {
                     c.setForeground(getTextPrimary());
                 }
 
-                if (text.equals("حاضر") || text.equals("مدفوع") || text.equals("1") || text.equals("حالي") || text.equals("نشط") || text.equals("ADMIN") || text.equals("مدير") || text.equals("مدير النظام")) {
+                if (text.equals("حاضر") || text.equals("مدفوع") || text.equals("1") || text.equals("حالي") || text.equals("نشط") || text.equals("ADMIN") || text.equals("مدير") || text.equals("مدير النظام") || text.contains("ADMIN")) {
                     if (!isSelected) {
                         c.setForeground(new Color(16, 185, 129));
                         setFont(FONT_BOLD);
                     }
-                } else if (text.equals("غائب") || text.equals("غير مدفوع") || text.equals("0") || text.equals("سابق") || text.equals("USER") || text.equals("مستخدم")) {
+                } else if (text.equals("غائب") || text.equals("غير مدفوع") || text.equals("0") || text.equals("سابق") || text.equals("USER") || text.equals("مستخدم") || text.contains("USER")) {
                     if (!isSelected) {
                         c.setForeground(new Color(239, 68, 68));
                         setFont(FONT_BOLD);
@@ -525,11 +622,71 @@ public class UITheme {
     // Modern Themed Dialog & JOptionPane Helper
     // ==========================================
     public static void applyThemeToUIManager() {
-        UIManager.put("OptionPane.background", getBgCard());
-        UIManager.put("OptionPane.messageForeground", getTextPrimary());
-        UIManager.put("Panel.background", getBgCard());
-        UIManager.put("Button.background", getBgCardSecondary());
-        UIManager.put("Button.foreground", getTextPrimary());
+        Color bgCard = getBgCard();
+        Color bgCardSec = getBgCardSecondary();
+        Color bgInput = getBgInput();
+        Color textPri = getTextPrimary();
+        Color textSec = getTextSecondary();
+        Color border = getBorderColor();
+
+        UIManager.put("Panel.background", bgCard);
+        UIManager.put("Panel.foreground", textPri);
+        UIManager.put("OptionPane.background", bgCard);
+        UIManager.put("OptionPane.messageForeground", textPri);
+        UIManager.put("Button.background", bgCardSec);
+        UIManager.put("Button.foreground", textPri);
+        // TextField
+        UIManager.put("TextField.background", bgInput);
+        UIManager.put("TextField.foreground", textPri);
+        UIManager.put("TextField.inactiveBackground", bgCardSec);
+        UIManager.put("TextField.inactiveForeground", textSec);
+        UIManager.put("TextField.disabledBackground", bgCardSec);
+        UIManager.put("TextField.disabledForeground", textSec);
+        UIManager.put("TextField.selectionBackground", PRIMARY);
+        UIManager.put("TextField.selectionForeground", Color.WHITE);
+        UIManager.put("TextField.caretForeground", textPri);
+        // PasswordField
+        UIManager.put("PasswordField.background", bgInput);
+        UIManager.put("PasswordField.foreground", textPri);
+        UIManager.put("PasswordField.inactiveBackground", bgCardSec);
+        UIManager.put("PasswordField.caretForeground", textPri);
+        // ComboBox
+        UIManager.put("ComboBox.background", bgInput);
+        UIManager.put("ComboBox.foreground", textPri);
+        UIManager.put("ComboBox.selectionBackground", PRIMARY);
+        UIManager.put("ComboBox.selectionForeground", Color.WHITE);
+        UIManager.put("ComboBox.disabledBackground", bgCardSec);
+        UIManager.put("ComboBox.disabledForeground", textSec);
+        // Spinner (used by JYearChooser inside JDateChooser)
+        UIManager.put("Spinner.background", bgInput);
+        UIManager.put("Spinner.foreground", textPri);
+        UIManager.put("Spinner.arrowButtonBackground", bgInput);
+        // CheckBox
+        UIManager.put("CheckBox.background", bgCard);
+        UIManager.put("CheckBox.foreground", textPri);
+        UIManager.put("RadioButton.background", bgCard);
+        UIManager.put("RadioButton.foreground", textPri);
+        // Table
+        UIManager.put("Table.background", bgCard);
+        UIManager.put("Table.foreground", textPri);
+        UIManager.put("Table.gridColor", border);
+        UIManager.put("Table.selectionBackground", ThemeManager.isDarkMode() ? new Color(55, 48, 163) : new Color(224, 231, 255));
+        UIManager.put("Table.selectionForeground", textPri);
+        UIManager.put("TableHeader.background", getTableHeaderBg());
+        UIManager.put("TableHeader.foreground", getTableHeaderFg());
+        // Scroll
+        UIManager.put("ScrollPane.background", bgCard);
+        UIManager.put("Viewport.background", bgCard);
+        UIManager.put("ScrollBar.background", bgCardSec);
+        UIManager.put("ScrollBar.thumb", border);
+        // Popup & Label
+        UIManager.put("PopupMenu.background", bgCard);
+        UIManager.put("PopupMenu.border", BorderFactory.createLineBorder(border, 1));
+        UIManager.put("Label.foreground", textPri);
+        UIManager.put("List.background", bgCard);
+        UIManager.put("List.foreground", textPri);
+        UIManager.put("List.selectionBackground", PRIMARY);
+        UIManager.put("List.selectionForeground", Color.WHITE);
     }
 
     public static void showThemedMessage(Component parent, String message, String title, int messageType) {

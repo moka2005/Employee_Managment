@@ -132,8 +132,7 @@ reg add "!REG_KEY!" /v "DisplayIcon" /t REG_SZ /d "!TARGET_DIR!\icons\app.ico" /
 reg add "!REG_KEY!" /v "DisplayVersion" /t REG_SZ /d "2.0.0" /f >nul 2>&1
 reg add "!REG_KEY!" /v "Publisher" /t REG_SZ /d "Employee Management System" /f >nul 2>&1
 reg add "!REG_KEY!" /v "InstallLocation" /t REG_SZ /d "!TARGET_DIR!" /f >nul 2>&1
-reg add "!REG_KEY!" /v "UninstallString" /t REG_SZ /d "cmd.exe /c \"\"!TARGET_DIR!\uninstall.bat\"\"" /f >nul 2>&1
-reg add "!REG_KEY!" /v "QuietUninstallString" /t REG_SZ /d "cmd.exe /c \"\"!TARGET_DIR!\uninstall.bat\"\"" /f >nul 2>&1
+reg add "!REG_KEY!" /v "UninstallString" /t REG_SZ /d "\"!TARGET_DIR!\uninstall.bat\"" /f >nul 2>&1
 reg add "!REG_KEY!" /v "NoModify" /t REG_DWORD /d 1 /f >nul 2>&1
 reg add "!REG_KEY!" /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
 

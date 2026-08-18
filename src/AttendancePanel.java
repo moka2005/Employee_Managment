@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Vector;
 
@@ -55,7 +56,10 @@ public class AttendancePanel {
         searchBox.setOpaque(false);
         searchBox.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 
-        JLabel searchIcon = UITheme.createFieldLabel("🔍 تصفية الموظفين:");
+        JLabel searchIcon = new JLabel("تصفية الموظفين:", IconHelper.getIcon("search.png", 16, 16), SwingConstants.RIGHT);
+        searchIcon.setFont(UITheme.FONT_BOLD);
+        searchIcon.setForeground(UITheme.getTextPrimary());
+        searchIcon.setHorizontalTextPosition(SwingConstants.LEFT);
         searchField = UITheme.createTextField(15);
         searchField.getDocument().addDocumentListener(new DocumentListener() {
             @Override public void insertUpdate(DocumentEvent e) { applyFilter(); }
@@ -197,6 +201,9 @@ public class AttendancePanel {
         JButton refreshBtn = UITheme.createSecondaryButton("تحديث القائمة", IconHelper.getIcon("empty.png", 16, 16));
         refreshBtn.addActionListener(e -> update());
 
+        JButton exportBtn = UITheme.createButton("تصدير Excel", IconHelper.getIcon("excel.png", 16, 16), new Color(16, 185, 129), Color.WHITE);
+        exportBtn.addActionListener(e -> ExcelExporter.exportTable(table, "قائمة_تسجيل_الحضور.xlsx", "الحضور والغياب"));
+
         JButton printBtn = UITheme.createButton("طباعة قائمة العمال", IconHelper.getIcon("print.png", 16, 16), new Color(99, 102, 241), Color.WHITE);
         printBtn.addActionListener(e -> {
             try {
@@ -207,6 +214,7 @@ public class AttendancePanel {
         });
 
         botActions.add(refreshBtn);
+        botActions.add(exportBtn);
         botActions.add(printBtn);
         tableCard.add(botActions, BorderLayout.SOUTH);
 
@@ -267,7 +275,7 @@ public class AttendancePanel {
         String state = (String) stateCombo.getSelectedItem();
         String payingState = (String) payingCombo.getSelectedItem();
         String reason = causeField.getText().trim();
-        java.sql.Date sqlDate = new java.sql.Date(dateChooser.getDate().getTime());
+        String sqlDate = new SimpleDateFormat("yyyy-MM-dd").format(dateChooser.getDate());
 
         int confirm = UITheme.showThemedConfirm(frame,
             "هل أنت متأكد من تسجيل حالة (" + state + " - " + payingState + ") للموظف: " + nameField.getText() + " بتاريخ " + sqlDate + "؟",

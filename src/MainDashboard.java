@@ -45,6 +45,7 @@ public class MainDashboard {
     }
 
     public static void buildMainUI(String initialPage) {
+        UITheme.applyThemeToUIManager();
         frame2.getContentPane().removeAll();
 
         cardLayout = new CardLayout();
@@ -91,9 +92,12 @@ public class MainDashboard {
 
     private static JPanel createTopBar() {
         JPanel topBar = new JPanel(new BorderLayout());
-        topBar.setBackground(UITheme.getBgSidebar());
+        topBar.setBackground(UITheme.getBgTopBar());
         topBar.setPreferredSize(new Dimension(0, 65));
-        topBar.setBorder(new EmptyBorder(10, 20, 10, 20));
+        topBar.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(0, 0, 1, 0, UITheme.getBorderColor()),
+            new EmptyBorder(10, 20, 10, 20)
+        ));
 
         // System Title + Logged In User Chip (Right)
         JPanel rightBox = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
@@ -102,20 +106,20 @@ public class MainDashboard {
 
         JLabel titleLabel = new JLabel("نظام إدارة الموظفين والمصاريف");
         titleLabel.setFont(UITheme.FONT_TITLE);
-        titleLabel.setForeground(Color.WHITE);
+        titleLabel.setForeground(UITheme.getTextPrimary());
 
         // Current User Badge Chip
         JPanel userBadge = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 4));
-        userBadge.setBackground(SessionManager.isAdmin() ? new Color(37, 99, 235) : new Color(51, 65, 85));
+        userBadge.setBackground(SessionManager.isAdmin() ? UITheme.PRIMARY : UITheme.getBgCardSecondary());
         userBadge.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(255, 255, 255, 60), 1, true),
+            BorderFactory.createLineBorder(UITheme.getBorderColor(), 1, true),
             new EmptyBorder(2, 8, 2, 8)
         ));
 
-        JLabel userIcon = new JLabel("👤");
+        JLabel userIcon = new JLabel(IconHelper.getIcon("user.png", 16, 16));
         JLabel userName = new JLabel(SessionManager.getUsername() + " (" + SessionManager.getRoleDisplay() + ")");
         userName.setFont(UITheme.FONT_BOLD);
-        userName.setForeground(Color.WHITE);
+        userName.setForeground(SessionManager.isAdmin() ? Color.WHITE : UITheme.getTextPrimary());
 
         userBadge.add(userIcon);
         userBadge.add(userName);
@@ -126,9 +130,9 @@ public class MainDashboard {
         // Date and Time + Logout (Left)
         Locale arabicLocale = new Locale("ar");
         SimpleDateFormat sdf = new SimpleDateFormat("EEEE ، d MMMM yyyy", arabicLocale);
-        JLabel dateLabel = new JLabel("📅 " + sdf.format(new Date()));
+        JLabel dateLabel = new JLabel(sdf.format(new Date()));
         dateLabel.setFont(UITheme.FONT_REGULAR);
-        dateLabel.setForeground(new Color(203, 213, 225));
+        dateLabel.setForeground(UITheme.getTextSecondary());
 
         JPanel leftBox = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
         leftBox.setOpaque(false);
@@ -158,7 +162,7 @@ public class MainDashboard {
         JPanel sidebar = new JPanel(new BorderLayout());
         sidebar.setBackground(UITheme.getBgSidebar());
         sidebar.setPreferredSize(new Dimension(240, 0));
-        sidebar.setBorder(BorderFactory.createMatteBorder(0, 1, 0, 0, UITheme.BORDER_DARK));
+        sidebar.setBorder(BorderFactory.createMatteBorder(0, 1, 0, 0, UITheme.getBorderColor()));
 
         java.util.List<String> titles = new java.util.ArrayList<>();
         java.util.List<String> iconNames = new java.util.ArrayList<>();
@@ -186,7 +190,7 @@ public class MainDashboard {
 
         if (SessionManager.isAdmin()) {
             titles.add("إدارة الحسابات");
-            iconNames.add("profil.png");
+            iconNames.add("profile-svgrepo-com 1.png");
             targets.add("page2");
         }
 
@@ -200,7 +204,9 @@ public class MainDashboard {
 
         for (int i = 0; i < titles.size(); i++) {
             final String targetPage = targets.get(i);
-            JButton btn = UITheme.createButton(titles.get(i), IconHelper.getIcon(iconNames.get(i), 22, 22), new Color(30, 41, 59), Color.WHITE);
+            Color btnBg = ThemeManager.isDarkMode() ? new Color(30, 41, 59) : new Color(241, 245, 249);
+            Color btnFg = UITheme.getTextPrimary();
+            JButton btn = UITheme.createButton(titles.get(i), IconHelper.getIcon(iconNames.get(i), 22, 22), btnBg, btnFg);
             btn.setHorizontalAlignment(SwingConstants.RIGHT);
             btn.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
             btn.setPreferredSize(new Dimension(210, 46));
@@ -249,7 +255,7 @@ public class MainDashboard {
         JPanel headerCard = UITheme.createCard();
         headerCard.setLayout(new BorderLayout());
 
-        JLabel welcomeTitle = new JLabel("مرحباً بك يا " + SessionManager.getUsername() + " في لوحة تحكم النظام 👋", SwingConstants.RIGHT);
+        JLabel welcomeTitle = new JLabel("مرحباً بك يا " + SessionManager.getUsername() + " في لوحة تحكم النظام", SwingConstants.RIGHT);
         welcomeTitle.setFont(UITheme.FONT_HERO);
         welcomeTitle.setForeground(UITheme.getTextPrimary());
 

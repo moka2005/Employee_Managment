@@ -39,11 +39,12 @@ public class LoginFrame {
         topToolBar.setOpaque(false);
 
         themeToggleBtn = UITheme.createSecondaryButton(
-            ThemeManager.isDarkMode() ? "☀️ الوضع الفاتح" : "🌙 الوضع الداكن",
-            null
+            ThemeManager.isDarkMode() ? "الوضع الفاتح" : "الوضع الداكن",
+            IconHelper.getIcon(ThemeManager.isDarkMode() ? "sun.png" : "moon.png", 18, 18)
         );
         themeToggleBtn.addActionListener(e -> {
             ThemeManager.toggleTheme();
+            UITheme.applyThemeToUIManager();
             buildUI();
         });
 
@@ -116,7 +117,7 @@ public class LoginFrame {
         });
 
         // Buttons
-        loginBtn = UITheme.createPrimaryButton("دخول للنظام", IconHelper.getIcon("include.png", 18, 18));
+        loginBtn = UITheme.createPrimaryButton("دخول للنظام", IconHelper.getIcon("Frame (1).png", 18, 18));
         loginBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
         loginBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
 
@@ -124,7 +125,8 @@ public class LoginFrame {
         exitBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
         exitBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        settingsBtn = new JButton("إعدادات قاعدة البيانات");
+        settingsBtn = new JButton("إعدادات قاعدة البيانات", IconHelper.getIcon("settings.png", 16, 16));
+        settingsBtn.setHorizontalTextPosition(SwingConstants.LEFT);
         settingsBtn.setFont(UITheme.FONT_SMALL);
         settingsBtn.setForeground(UITheme.PRIMARY);
         settingsBtn.setContentAreaFilled(false);
@@ -324,9 +326,9 @@ public class LoginFrame {
                 DBConfig.updatePostgres(hostField.getText(), portField.getText(), nameField.getText(), uField.getText(), new String(pField.getPassword()));
             }
             if (DBManager.testConnection()) {
-                UITheme.showThemedMessage(dialog, "✅ تم الاتصال بنجاح بمحرك: " + DBConfig.getDbType(), "نجاح الاتصال", JOptionPane.INFORMATION_MESSAGE);
+                UITheme.showThemedMessage(dialog, "تم الاتصال بنجاح بمحرك: " + DBConfig.getDbType(), "نجاح الاتصال", JOptionPane.INFORMATION_MESSAGE);
             } else {
-                UITheme.showThemedMessage(dialog, "❌ فشل الاتصال بقاعدة البيانات!", "خطأ", JOptionPane.ERROR_MESSAGE);
+                UITheme.showThemedMessage(dialog, "فشل الاتصال بقاعدة البيانات!", "خطأ", JOptionPane.ERROR_MESSAGE);
             }
         });
 

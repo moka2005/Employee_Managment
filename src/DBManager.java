@@ -2,27 +2,35 @@ import javax.swing.*;
 import java.io.File;
 import java.sql.*;
 
+/**
+ * DBManager – Manages database connections.
+ *
+ * SQLite fix: uses a single shared connection with WAL journal mode and a
+ * 5-second busy_timeout so concurrent reads/writes never throw SQLITE_BUSY.
+ * PostgreSQL: opens a fresh connection per call (it handles concurrency natively).
+ */
 public class DBManager {
+
+    // ── SQLite singleton connection ──────────────────────────────────────────
+    private static Connection sqliteConnection = null;
+    private static final Object SQLITE_LOCK = new Object();
+
     static {
-        try {
-            Class.forName("org.sqlite.JDBC");
-        } catch (ClassNotFoundException e) {
-            System.err.println("SQLite Driver notice: " + e.getMessage());
-        }
-        try {
-            Class.forName("org.postgresql.Driver");
-        } catch (ClassNotFoundException e) {
-            System.err.println("PostgreSQL Driver notice: " + e.getMessage());
-        }
+        try { Class.forName("org.sqlite.JDBC"); }
+        catch (ClassNotFoundException e) { System.err.println("SQLite Driver notice: " + e.getMessage()); }
+        try { Class.forName("org.postgresql.Driver"); }
+        catch (ClassNotFoundException e) { System.err.println("PostgreSQL Driver notice: " + e.getMessage()); }
     }
 
+    /**
+     * Returns a JDBC Connection.
+     * <p>
+     * • SQLite  → reuses one shared, long-lived connection (WAL + busy_timeout).
+     * • PostgreSQL → opens a fresh connection each call (pool via PG itself).
+     */
     public static Connection getConnection() throws SQLException {
         if (DBConfig.isSqlite()) {
-            File dbFile = new File(DBConfig.getSqlitePath());
-            if (dbFile.getParentFile() != null && !dbFile.getParentFile().exists()) {
-                dbFile.getParentFile().mkdirs();
-            }
-            return DriverManager.getConnection(DBConfig.getJdbcUrl());
+            return getSqliteConnection();
         } else {
             return DriverManager.getConnection(
                 DBConfig.getJdbcUrl(),
@@ -32,14 +40,62 @@ public class DBManager {
         }
     }
 
+    /**
+     * Returns (or creates) the singleton SQLite connection.
+     * Thread-safe via synchronized block.
+     */
+    private static Connection getSqliteConnection() throws SQLException {
+        synchronized (SQLITE_LOCK) {
+            // Re-create if connection is closed or null
+            if (sqliteConnection == null || sqliteConnection.isClosed()) {
+                File dbFile = new File(DBConfig.getSqlitePath());
+                if (dbFile.getParentFile() != null && !dbFile.getParentFile().exists()) {
+                    dbFile.getParentFile().mkdirs();
+                }
+
+                sqliteConnection = DriverManager.getConnection(DBConfig.getJdbcUrl());
+
+                try (Statement st = sqliteConnection.createStatement()) {
+                    // WAL mode: allows concurrent reads while a write is in progress
+                    st.execute("PRAGMA journal_mode=WAL;");
+                    // Wait up to 5 seconds instead of immediately throwing SQLITE_BUSY
+                    st.execute("PRAGMA busy_timeout=5000;");
+                    // Recommended performance pragma when using WAL
+                    st.execute("PRAGMA synchronous=NORMAL;");
+                }
+            }
+            return sqliteConnection;
+        }
+    }
+
+    /**
+     * Call this when the application shuts down to cleanly close the SQLite file.
+     */
+    public static void closeAll() {
+        synchronized (SQLITE_LOCK) {
+            if (sqliteConnection != null) {
+                try { sqliteConnection.close(); } catch (SQLException ignored) {}
+                sqliteConnection = null;
+            }
+        }
+    }
+
+    // ── Health check ─────────────────────────────────────────────────────────
+
     public static boolean testConnection() {
-        try (Connection conn = getConnection()) {
-            return conn != null && !conn.isClosed();
+        try {
+            Connection conn = getConnection();
+            boolean ok = conn != null && !conn.isClosed();
+            // For PostgreSQL the connection is caller-managed; close it here.
+            if (!DBConfig.isSqlite() && conn != null) conn.close();
+            return ok;
         } catch (SQLException e) {
             System.err.println("Connection test failed: " + e.getMessage());
             return false;
         }
     }
+
+    // ── Schema initialisation ─────────────────────────────────────────────────
 
     public static void initializeDatabase() {
         if (DBConfig.isSqlite()) {
@@ -116,13 +172,10 @@ public class DBManager {
             "INSERT OR IGNORE INTO users (FirstN, pass, role) VALUES ('admin', 'admin', 'ADMIN');"
         };
 
-        try (Connection conn = getConnection(); Statement stmt = conn.createStatement()) {
+        try (Statement stmt = getConnection().createStatement()) {
             for (String sql : stmts) {
-                try {
-                    stmt.execute(sql);
-                } catch (SQLException ex) {
-                    System.err.println("Notice executing SQLite schema: " + ex.getMessage());
-                }
+                try { stmt.execute(sql); }
+                catch (SQLException ex) { System.err.println("Notice executing SQLite schema: " + ex.getMessage()); }
             }
         } catch (SQLException e) {
             System.err.println("SQLite auto-init failed: " + e.getMessage());
@@ -200,23 +253,31 @@ public class DBManager {
 
         try (Connection conn = getConnection(); Statement stmt = conn.createStatement()) {
             for (String sql : stmts) {
-                try {
-                    stmt.execute(sql);
-                } catch (SQLException ex) {
-                    System.err.println("Notice executing PostgreSQL schema: " + ex.getMessage());
-                }
+                try { stmt.execute(sql); }
+                catch (SQLException ex) { System.err.println("Notice executing PostgreSQL schema: " + ex.getMessage()); }
             }
         } catch (SQLException e) {
             System.err.println("PostgreSQL auto-init failed: " + e.getMessage());
         }
     }
 
+    // ── Convenience helpers ───────────────────────────────────────────────────
+
     public static boolean executeUpdate(String sql, Object... params) {
-        try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            for (int i = 0; i < params.length; i++) {
-                pstmt.setObject(i + 1, params[i]);
+        try {
+            Connection conn = getConnection();
+            // For SQLite we reuse the singleton; for PG we need try-with-resources.
+            if (DBConfig.isSqlite()) {
+                try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                    for (int i = 0; i < params.length; i++) pstmt.setObject(i + 1, params[i]);
+                    pstmt.executeUpdate();
+                }
+            } else {
+                try (Connection pgConn = conn; PreparedStatement pstmt = pgConn.prepareStatement(sql)) {
+                    for (int i = 0; i < params.length; i++) pstmt.setObject(i + 1, params[i]);
+                    pstmt.executeUpdate();
+                }
             }
-            pstmt.executeUpdate();
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -226,8 +287,13 @@ public class DBManager {
     }
 
     public static boolean execute(String sql) {
-        try (Connection conn = getConnection(); Statement stmt = conn.createStatement()) {
-            stmt.execute(sql);
+        try {
+            Connection conn = getConnection();
+            if (DBConfig.isSqlite()) {
+                try (Statement stmt = conn.createStatement()) { stmt.execute(sql); }
+            } else {
+                try (Connection pgConn = conn; Statement stmt = pgConn.createStatement()) { stmt.execute(sql); }
+            }
             return true;
         } catch (SQLException e) {
             e.printStackTrace();

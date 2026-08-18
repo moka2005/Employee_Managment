@@ -93,9 +93,10 @@ public class SettingsPanel {
         JPanel userInfoBox = new JPanel(new GridLayout(2, 1, 4, 4));
         userInfoBox.setOpaque(false);
 
-        JLabel userNameLbl = new JLabel("👤 " + SessionManager.getUsername(), SwingConstants.CENTER);
+        JLabel userNameLbl = new JLabel(SessionManager.getUsername(), IconHelper.getIcon("user.png", 22, 22), SwingConstants.CENTER);
         userNameLbl.setFont(new Font("Segoe UI", Font.BOLD, 18));
         userNameLbl.setForeground(UITheme.getTextPrimary());
+        userNameLbl.setHorizontalTextPosition(SwingConstants.LEFT);
 
         JLabel userRoleLbl = new JLabel("الصلاحية: " + SessionManager.getRoleDisplay(), SwingConstants.CENTER);
         userRoleLbl.setFont(UITheme.FONT_REGULAR);
@@ -115,11 +116,12 @@ public class SettingsPanel {
         dbTitle.setFont(UITheme.FONT_SUBTITLE);
         dbTitle.setForeground(UITheme.PURPLE);
 
-        JLabel dbStatus = new JLabel("الحالة: متصل بنجاح ✅", SwingConstants.CENTER);
+        JLabel dbStatus = new JLabel("الحالة: متصل بنجاح", IconHelper.getIcon("check.png", 16, 16), SwingConstants.CENTER);
         dbStatus.setFont(UITheme.FONT_BOLD);
         dbStatus.setForeground(UITheme.SUCCESS);
+        dbStatus.setHorizontalTextPosition(SwingConstants.LEFT);
 
-        JButton dbConfigBtn = UITheme.createSecondaryButton("تعديل إعدادات الاتصال", null);
+        JButton dbConfigBtn = UITheme.createSecondaryButton("تعديل إعدادات الاتصال", IconHelper.getIcon("settings.png", 16, 16));
         dbConfigBtn.addActionListener(e -> showDBSettingsDialog());
 
         dbCard.add(dbTitle, BorderLayout.NORTH);
@@ -149,7 +151,10 @@ public class SettingsPanel {
         logSearchBox.setOpaque(false);
         logSearchBox.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 
-        JLabel sIcon = UITheme.createFieldLabel("🔍 بحث في السجل:");
+        JLabel sIcon = new JLabel("بحث في السجل:", IconHelper.getIcon("search.png", 16, 16), SwingConstants.RIGHT);
+        sIcon.setFont(UITheme.FONT_BOLD);
+        sIcon.setForeground(UITheme.getTextPrimary());
+        sIcon.setHorizontalTextPosition(SwingConstants.LEFT);
         searchField = UITheme.createTextField(16);
         searchField.getDocument().addDocumentListener(new DocumentListener() {
             @Override public void insertUpdate(DocumentEvent e) { applyFilter(); }
@@ -278,7 +283,7 @@ public class SettingsPanel {
         panel.setPreferredSize(new Dimension(170, 110));
         panel.setBorder(new EmptyBorder(70, 8, 8, 8));
 
-        JLabel titleLbl = new JLabel((isSelected ? "✓ " : "") + title, SwingConstants.CENTER);
+        JLabel titleLbl = new JLabel((isSelected ? "(مفعل) " : "") + title, SwingConstants.CENTER);
         titleLbl.setFont(UITheme.FONT_BOLD);
         titleLbl.setForeground(isSelected ? new Color(16, 185, 129) : UITheme.getTextPrimary());
         panel.add(titleLbl, BorderLayout.SOUTH);
@@ -416,9 +421,9 @@ public class SettingsPanel {
                 DBConfig.updatePostgres(hostField.getText(), portField.getText(), nameField.getText(), uField.getText(), new String(pField.getPassword()));
             }
             if (DBManager.testConnection()) {
-                UITheme.showThemedMessage(dialog, "✅ تم الاتصال بنجاح بمحرك: " + DBConfig.getDbType(), "نجاح الاتصال", JOptionPane.INFORMATION_MESSAGE);
+                UITheme.showThemedMessage(dialog, "تم الاتصال بنجاح بمحرك: " + DBConfig.getDbType(), "نجاح الاتصال", JOptionPane.INFORMATION_MESSAGE);
             } else {
-                UITheme.showThemedMessage(dialog, "❌ فشل الاتصال بقاعدة البيانات!", "خطأ", JOptionPane.ERROR_MESSAGE);
+                UITheme.showThemedMessage(dialog, "فشل الاتصال بقاعدة البيانات!", "خطأ", JOptionPane.ERROR_MESSAGE);
             }
         });
 

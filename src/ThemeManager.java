@@ -38,6 +38,7 @@ public class ThemeManager {
     public static void setDarkMode(boolean dark) {
         darkMode = dark;
         saveTheme();
+        IconHelper.clearCache();
         notifyListeners();
     }
 

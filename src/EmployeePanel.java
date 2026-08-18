@@ -17,16 +17,19 @@ import java.util.Date;
 import java.util.Vector;
 
 class ProfilePhotoPanel extends JPanel {
+    public ProfilePhotoPanel() {
+        setOpaque(false);
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 
         int w = getWidth();
         int h = getHeight();
-        int size = Math.min(w, h) - 20;
+        int size = Math.min(w, h) - 16;
         int x = (w - size) / 2;
         int y = (h - size) / 2;
 
@@ -37,22 +40,30 @@ class ProfilePhotoPanel extends JPanel {
                 img = new ImageIcon(EmployeePanel.imagePath).getImage();
             }
         }
-        if (img == null) {
-            ImageIcon def = IconHelper.getIcon("profil.png", size, size);
-            if (def != null) img = def.getImage();
-        }
 
-        g2.setColor(UITheme.getBgCard());
-        g2.fill(new RoundRectangle2D.Float(x, y, size, size, 20, 20));
+        // Fill background of the photo card with clean theme secondary card color
+        g2.setColor(UITheme.getBgCardSecondary());
+        g2.fill(new RoundRectangle2D.Float(x, y, size, size, 16, 16));
+
         if (img != null) {
-            Shape clip = new RoundRectangle2D.Float(x, y, size, size, 20, 20);
+            Shape clip = new RoundRectangle2D.Float(x, y, size, size, 16, 16);
             g2.setClip(clip);
             g2.drawImage(img, x, y, size, size, this);
             g2.setClip(null);
+        } else {
+            // Use original profil.png as placeholder avatar
+            ImageIcon def = IconHelper.getIcon("profil.png", size, size);
+            if (def != null && def.getImage() != null) {
+                Shape clip = new RoundRectangle2D.Float(x, y, size, size, 16, 16);
+                g2.setClip(clip);
+                g2.drawImage(def.getImage(), x, y, size, size, this);
+                g2.setClip(null);
+            }
         }
+
         g2.setColor(UITheme.getBorderColor());
-        g2.setStroke(new BasicStroke(2));
-        g2.draw(new RoundRectangle2D.Float(x, y, size, size, 20, 20));
+        g2.setStroke(new BasicStroke(1.5f));
+        g2.draw(new RoundRectangle2D.Float(x, y, size, size, 16, 16));
         g2.dispose();
     }
 
@@ -110,7 +121,10 @@ public class EmployeePanel {
         searchBox.setOpaque(false);
         searchBox.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 
-        JLabel searchIcon = UITheme.createFieldLabel("🔍 بحث سريع:");
+        JLabel searchIcon = new JLabel("بحث سريع:", IconHelper.getIcon("search.png", 16, 16), SwingConstants.RIGHT);
+        searchIcon.setFont(UITheme.FONT_BOLD);
+        searchIcon.setForeground(UITheme.getTextPrimary());
+        searchIcon.setHorizontalTextPosition(SwingConstants.LEFT);
         searchField = UITheme.createTextField(16);
         searchField.setToolTipText("ابحث بالاسم، اللقب، رقم الهاتف، أو رقم التعريف");
         searchField.getDocument().addDocumentListener(new DocumentListener() {
@@ -291,11 +305,12 @@ public class EmployeePanel {
 
         // Action Buttons Bar
         JPanel actionCard = UITheme.createCard();
-        actionCard.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 5));
+        actionCard.setLayout(new FlowLayout(FlowLayout.CENTER, 8, 5));
         actionCard.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 
         JButton addBtn = UITheme.createPrimaryButton("موظف جديد", IconHelper.getIcon("include.png", 16, 16));
         JButton editBtn = UITheme.createSuccessButton("تعديل وحفظ", IconHelper.getIcon("edit.png", 16, 16));
+        JButton reactivateBtn = UITheme.createButton("إعادة تفعيل الموظف", IconHelper.getIcon("check.png", 16, 16), new Color(16, 185, 129), Color.WHITE);
         JButton deleteBtn = UITheme.createDangerButton("إنهاء خدمة / حذف", IconHelper.getIcon("delete.png", 16, 16));
         JButton clearBtn = UITheme.createSecondaryButton("إفراغ الخانات", IconHelper.getIcon("empty.png", 16, 16));
         JButton exportBtn = UITheme.createButton("تصدير Excel", IconHelper.getIcon("excel.png", 16, 16), new Color(16, 185, 129), Color.WHITE);
@@ -303,6 +318,7 @@ public class EmployeePanel {
 
         addBtn.addActionListener(e -> addEmployee());
         editBtn.addActionListener(e -> updateEmployee());
+        reactivateBtn.addActionListener(e -> reactivateSelectedEmployee());
         deleteBtn.addActionListener(e -> deleteOrArchiveEmployee());
         clearBtn.addActionListener(e -> clearFields());
         exportBtn.addActionListener(e -> ExcelExporter.exportTable(table, "قائمة_العمال.xlsx", "العمال"));
@@ -310,6 +326,7 @@ public class EmployeePanel {
 
         actionCard.add(addBtn);
         actionCard.add(editBtn);
+        actionCard.add(reactivateBtn);
         actionCard.add(deleteBtn);
         actionCard.add(clearBtn);
         actionCard.add(exportBtn);
@@ -371,6 +388,19 @@ public class EmployeePanel {
         }
     }
 
+    /** Returns true if the given employee ID exists in the database. */
+    private boolean employeeExistsInDB(String id) {
+        String sql = "SELECT 1 FROM employee WHERE id_employee = ?";
+        try (Connection conn = DBManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     private void addEmployee() {
         String id = idField.getText().trim();
         String nom = nomField.getText().trim();
@@ -400,27 +430,49 @@ public class EmployeePanel {
             salaire = Integer.parseInt(salaireStr.replaceAll("[^0-9]", ""));
         } catch (Exception ignored) {}
 
-        java.sql.Date birthDate = birthDateChooser.getDate() != null ? new java.sql.Date(birthDateChooser.getDate().getTime()) : null;
-        java.sql.Date joinDate = new java.sql.Date(new Date().getTime());
+        String birthDate = birthDateChooser.getDate() != null ? new SimpleDateFormat("yyyy-MM-dd").format(birthDateChooser.getDate()) : null;
+        String joinDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
 
-        String checkSql = "SELECT activ_emp FROM employee WHERE id_employee = ?";
+        // Check if ID already exists
+        String checkSql = "SELECT nom, prenom, activ_emp FROM employee WHERE id_employee = ?";
         try (Connection conn = DBManager.getConnection(); PreparedStatement pstmt = conn.prepareStatement(checkSql)) {
             pstmt.setString(1, id);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     int active = rs.getInt("activ_emp");
+                    String empName = rs.getString("nom") + " " + rs.getString("prenom");
                     if (active == 0) {
-                        int c = UITheme.showThemedConfirm(frame, "هذا الموظف موجود في الأرشيف (سابق). هل تريد إعادة تفعيله؟", "استرجاع موظف", JOptionPane.YES_NO_OPTION);
+                        int c = UITheme.showThemedConfirm(frame, "الموظف (" + empName + ") موجود في الأرشيف (سابق).\nهل تريد إعادة تفعيله وتحديث بياناته؟", "استرجاع موظف سابق", JOptionPane.YES_NO_OPTION);
                         if (c == JOptionPane.YES_OPTION) {
-                            String reactivateSql = "UPDATE employee SET activ_emp = 1, nom=?, prenom=?, telephone=?, post=?, salaire=?, etat=?, date_embauche=?, date_depart='2030-12-12' WHERE id_employee = ?";
-                            DBManager.executeUpdate(reactivateSql, nom, prenom, phone, post, salaire, etat, joinDate, id);
-                            Action_radio(radio_buttom, g);
-                            clearFields();
-                            ActivityLogger.log("استرجاع موظف", "قام بإعادة تفعيل الموظف: " + nom + " " + prenom + " (معرف: " + id + ")");
-                            UITheme.showThemedMessage(frame, "تمت إعادة تفعيل الموظف بنجاح!", "نجاح", JOptionPane.INFORMATION_MESSAGE);
+                            performReactivation(id, nom, prenom, birthDate, phone, post, salaire, etat, joinDate);
                         }
                     } else {
-                        UITheme.showThemedMessage(frame, "رقم التعريف الوطني مستعمل بالفعل لموظف حالي!", "خطأ", JOptionPane.ERROR_MESSAGE);
+                        UITheme.showThemedMessage(frame, "رقم التعريف الوطني (" + id + ") مستعمل بالفعل للموظف الحالي: " + empName + "!", "تنبيه معرف مكرر", JOptionPane.ERROR_MESSAGE);
+                    }
+                    return;
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        // Check if Phone already exists for another employee
+        String checkPhoneSql = "SELECT id_employee, nom, prenom, activ_emp FROM employee WHERE telephone = ?";
+        try (Connection conn = DBManager.getConnection(); PreparedStatement pstmt = conn.prepareStatement(checkPhoneSql)) {
+            pstmt.setString(1, phone);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    String existingId = rs.getString("id_employee");
+                    String empName = rs.getString("nom") + " " + rs.getString("prenom");
+                    int active = rs.getInt("activ_emp");
+                    if (active == 1) {
+                        UITheme.showThemedMessage(frame, "رقم الهاتف (" + phone + ") مسجل بالفعل للموظف الحالي:\n" + empName + " (رقم التعريف: " + existingId + ")\nالرجاء إدخال رقم هاتف آخر.", "تنبيه رقم الهاتف مكرر", JOptionPane.WARNING_MESSAGE);
+                    } else {
+                        int c = UITheme.showThemedConfirm(frame, "رقم الهاتف (" + phone + ") مسجل لموظف سابق في الأرشيف:\n" + empName + " (رقم التعريف: " + existingId + ").\nهل تريد استرجاع وإعادة تفعيل هذا الموظف؟", "استرجاع موظف", JOptionPane.YES_NO_OPTION);
+                        if (c == JOptionPane.YES_OPTION) {
+                            idField.setText(existingId);
+                            performReactivation(existingId, nom, prenom, birthDate, phone, post, salaire, etat, joinDate);
+                        }
                     }
                     return;
                 }
@@ -435,7 +487,8 @@ public class EmployeePanel {
         boolean success = DBManager.executeUpdate(insertSql, id, nom, prenom, birthDate, joinDate, phone, post, salaire, etat);
         if (success) {
             if (!imagePath.isEmpty()) {
-                DBManager.executeUpdate("INSERT INTO photo_path (employee_id, path) VALUES (?, ?) ON CONFLICT (employee_id) DO UPDATE SET path = EXCLUDED.path", id, imagePath);
+                DBManager.executeUpdate("DELETE FROM photo_path WHERE employee_id = ?", id);
+                DBManager.executeUpdate("INSERT INTO photo_path (employee_id, path) VALUES (?, ?)", id, imagePath);
             }
             DBManager.executeUpdate("INSERT INTO date_emp (id_employee, date_embauche, \"date_départ\") VALUES (?, ?, '2030-12-12')", id, joinDate);
 
@@ -460,12 +513,62 @@ public class EmployeePanel {
             return;
         }
 
+        // ── NEW: verify employee is actually saved in DB ──────────────────
+        if (!employeeExistsInDB(id)) {
+            UITheme.showThemedMessage(frame,
+                "الموظف غير موجود في قاعدة البيانات!\nالرجاء إضافته أولاً بالضغط على زر \"موظف جديد\".",
+                "خطأ", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (phone.length() != 10 || !phone.matches("\\d+")) {
+            UITheme.showThemedMessage(frame, "رقم الهاتف يجب أن يتكون من 10 أرقام!", "خطأ في الإدخال", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+
         int salaire = 1000;
         try {
             salaire = Integer.parseInt(salaireStr.replaceAll("[^0-9]", ""));
         } catch (Exception ignored) {}
 
-        java.sql.Date birthDate = birthDateChooser.getDate() != null ? new java.sql.Date(birthDateChooser.getDate().getTime()) : null;
+        String birthDate = birthDateChooser.getDate() != null ? new SimpleDateFormat("yyyy-MM-dd").format(birthDateChooser.getDate()) : null;
+
+        // Check if phone belongs to another employee
+        String checkPhoneSql = "SELECT nom, prenom FROM employee WHERE telephone = ? AND id_employee != ?";
+        try (Connection conn = DBManager.getConnection(); PreparedStatement pstmt = conn.prepareStatement(checkPhoneSql)) {
+            pstmt.setString(1, phone);
+            pstmt.setString(2, id);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    UITheme.showThemedMessage(frame, "رقم الهاتف (" + phone + ") مستخدم بالفعل لموظف آخر (" + rs.getString("nom") + " " + rs.getString("prenom") + ")!", "خطأ في الهاتف", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        // Check if employee is inactive, ask to reactivate
+        String checkActSql = "SELECT activ_emp FROM employee WHERE id_employee = ?";
+        int currentActive = 1;
+        try (Connection conn = DBManager.getConnection(); PreparedStatement pstmt = conn.prepareStatement(checkActSql)) {
+            pstmt.setString(1, id);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    currentActive = rs.getInt("activ_emp");
+                }
+            }
+        } catch (Exception ignored) {}
+
+        if (currentActive == 0) {
+            int c = UITheme.showThemedConfirm(frame, "هذا الموظف غير نشط حالياً (في الأرشيف).\nهل تريد حفظ التعديلات وإعادة تفعيله كموظف حالي أيضاً؟", "تأكيد إعادة التفعيل", JOptionPane.YES_NO_OPTION);
+            if (c == JOptionPane.YES_OPTION) {
+                String joinDateSql = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+                performReactivation(id, nom, prenom, birthDate, phone, post, salaire, etat, joinDateSql);
+                return;
+            }
+        }
 
         String updateSql = "UPDATE employee SET nom=?, prenom=?, date_naissance=?, telephone=?, post=?, salaire=?, etat=? WHERE id_employee=?";
         boolean success = DBManager.executeUpdate(updateSql, nom, prenom, birthDate, phone, post, salaire, etat, id);
@@ -480,22 +583,196 @@ public class EmployeePanel {
         }
     }
 
+    private void reactivateSelectedEmployee() {
+        String id = idField.getText().trim();
+        String nom = nomField.getText().trim();
+        String prenom = prenomField.getText().trim();
+        String phone = phoneField.getText().trim();
+        String post = (String) postCombo.getSelectedItem();
+        String salaireStr = (String) salaireCombo.getSelectedItem();
+        String etat = (String) etatCombo.getSelectedItem();
+
+        if (id.isEmpty()) {
+            UITheme.showThemedMessage(frame, "الرجاء اختيار الموظف المراد إعادة تفعيله من الجدول أولاً!", "تنبيه", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // ── verify employee is actually saved in DB ───────────────────────
+        if (!employeeExistsInDB(id)) {
+            UITheme.showThemedMessage(frame,
+                "الموظف غير موجود في قاعدة البيانات!\nالرجاء إضافته أولاً بالضغط على زر \"موظف جديد\".",
+                "خطأ", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+
+        int salaire = 1000;
+        try {
+            salaire = Integer.parseInt(salaireStr.replaceAll("[^0-9]", ""));
+        } catch (Exception ignored) {}
+
+        String birthDate = birthDateChooser.getDate() != null ? new SimpleDateFormat("yyyy-MM-dd").format(birthDateChooser.getDate()) : null;
+        String joinDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+
+        // Check if phone belongs to another active employee
+        String checkPhoneSql = "SELECT nom, prenom FROM employee WHERE telephone = ? AND id_employee != ? AND activ_emp = 1";
+        try (Connection conn = DBManager.getConnection(); PreparedStatement pstmt = conn.prepareStatement(checkPhoneSql)) {
+            pstmt.setString(1, phone);
+            pstmt.setString(2, id);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    UITheme.showThemedMessage(frame, "رقم الهاتف (" + phone + ") مستخدم بالفعل لموظف نشط آخر (" + rs.getString("nom") + " " + rs.getString("prenom") + ")!\nيرجى تعديل رقم الهاتف قبل إعادة التفعيل.", "تنبيه", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        int confirm = UITheme.showThemedConfirm(frame, "هل أنت متأكد من إعادة تفعيل الموظف: " + nom + " " + prenom + " (معرف: " + id + ")؟", "تأكيد إعادة التفعيل", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
+            performReactivation(id, nom, prenom, birthDate, phone, post, salaire, etat, joinDate);
+        }
+    }
+
+    private void performReactivation(String id, String nom, String prenom, String birthDate, String phone, String post, int salaire, String etat, String joinDate) {
+        String reactivateSql = "UPDATE employee SET activ_emp = 1, nom=?, prenom=?, date_naissance=?, telephone=?, post=?, salaire=?, etat=?, date_embauche=?, date_depart='2030-12-12' WHERE id_employee = ?";
+        boolean ok = DBManager.executeUpdate(reactivateSql, nom, prenom, birthDate, phone, post, salaire, etat, joinDate, id);
+        if (ok) {
+            DBManager.executeUpdate("INSERT INTO date_emp (id_employee, date_embauche, \"date_départ\") VALUES (?, ?, '2030-12-12')", id, joinDate);
+            if (!imagePath.isEmpty()) {
+                DBManager.executeUpdate("DELETE FROM photo_path WHERE employee_id = ?", id);
+                DBManager.executeUpdate("INSERT INTO photo_path (employee_id, path) VALUES (?, ?)", id, imagePath);
+            }
+            if (radio_buttom[1] != null) {
+                radio_buttom[1].setSelected(true);
+            }
+            Action_radio(radio_buttom, g);
+            clearFields();
+            ActivityLogger.log("إعادة تفعيل موظف", "قام بإعادة تفعيل الموظف: " + nom + " " + prenom + " (معرف: " + id + ")");
+            UITheme.showThemedMessage(frame, "تمت إعادة تفعيل الموظف بنجاح وعودته إلى قائمة العمال النشطين!", "نجاح العملية", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
     private void deleteOrArchiveEmployee() {
         String id = idField.getText().trim();
+        String nom = nomField.getText().trim();
+        String prenom = prenomField.getText().trim();
+
         if (id.isEmpty()) {
             UITheme.showThemedMessage(frame, "الرجاء اختيار الموظف المراد إنهاء خدمته / حذفه", "تنبيه", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        JDialog dialog = new JDialog((Frame) null, "تأكيد إنهاء خدمة الموظف", true);
-        dialog.setLayout(new BorderLayout());
-        dialog.setSize(380, 220);
-        dialog.setLocationRelativeTo(frame);
-        dialog.getContentPane().setBackground(UITheme.getBgCard());
+        String empName = nom.isEmpty() ? id : nom + " " + prenom;
+
+        // ── verify employee is actually saved in DB ───────────────────────
+        if (!employeeExistsInDB(id)) {
+            UITheme.showThemedMessage(frame,
+                "الموظف غير موجود في قاعدة البيانات!\nالرجاء إضافته أولاً بالضغط على زر \"موظف جديد\".",
+                "خطأ", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // ── Main choice dialog ──────────────────────────────────────────────
+        JDialog choiceDialog = new JDialog((Frame) null, "إجراء على الموظف", true);
+        choiceDialog.setLayout(new BorderLayout(0, 0));
+        choiceDialog.setSize(460, 270);
+        choiceDialog.setLocationRelativeTo(frame);
+        choiceDialog.setResizable(false);
+        choiceDialog.getContentPane().setBackground(UITheme.getBgCard());
+
+        // Title bar
+        JLabel titleLbl = new JLabel("اختر الإجراء المناسب للموظف: " + empName, SwingConstants.RIGHT);
+        titleLbl.setFont(UITheme.FONT_BOLD);
+        titleLbl.setForeground(UITheme.getTextPrimary());
+        titleLbl.setBorder(new EmptyBorder(18, 18, 10, 18));
+        choiceDialog.add(titleLbl, BorderLayout.NORTH);
+
+        // Description labels panel
+        JPanel descPanel = new JPanel(new GridLayout(2, 1, 0, 12));
+        descPanel.setOpaque(false);
+        descPanel.setBorder(new EmptyBorder(0, 18, 0, 18));
+        descPanel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+
+        JLabel archiveDesc = new JLabel("إنهاء المهام  — يُحفظ الموظف في الأرشيف مع تسجيل تاريخ الخروج",
+            IconHelper.getIcon("dismissal.png", 18, 18), SwingConstants.RIGHT);
+        archiveDesc.setFont(UITheme.FONT_REGULAR);
+        archiveDesc.setForeground(UITheme.getTextSecondary());
+        archiveDesc.setIconTextGap(8);
+        archiveDesc.setHorizontalTextPosition(SwingConstants.LEFT);
+
+        JLabel deleteDesc = new JLabel("حذف نهائي  — يُحذف الموظف وجميع بياناته بشكل لا يمكن التراجع عنه",
+            IconHelper.getIcon("delete.png", 18, 18), SwingConstants.RIGHT);
+        deleteDesc.setFont(UITheme.FONT_REGULAR);
+        deleteDesc.setForeground(new Color(239, 68, 68));
+        deleteDesc.setIconTextGap(8);
+        deleteDesc.setHorizontalTextPosition(SwingConstants.LEFT);
+
+        descPanel.add(archiveDesc);
+        descPanel.add(deleteDesc);
+        choiceDialog.add(descPanel, BorderLayout.CENTER);
+
+        // Buttons
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 14));
+        btnPanel.setBackground(UITheme.getBgCard());
+
+        JButton archiveBtn = UITheme.createButton("إنهاء المهام", IconHelper.getIcon("dismissal.png", 16, 16), new Color(245, 158, 11), Color.WHITE);
+        JButton deleteBtn  = UITheme.createDangerButton("حذف نهائي", IconHelper.getIcon("delete.png", 16, 16));
+        JButton cancelBtn  = UITheme.createSecondaryButton("إلغاء", null);
+
+        // ── Archive action ──────────────────────────────────────────────────
+        archiveBtn.addActionListener(e -> {
+            choiceDialog.dispose();
+            showArchiveDialog(id, empName);
+        });
+
+        // ── Permanent delete action ─────────────────────────────────────────
+        deleteBtn.addActionListener(e -> {
+            choiceDialog.dispose();
+            int confirm = UITheme.showThemedConfirm(frame,
+                "تحذير: سيتم حذف الموظف \"" + empName + "\" وجميع بياناته نهائياً!\n" +
+                "هذا الإجراء لا يمكن التراجع عنه. هل أنت متأكد؟",
+                "تأكيد الحذف النهائي", JOptionPane.YES_NO_OPTION);
+
+            if (confirm == JOptionPane.YES_OPTION) {
+                boolean ok = DBManager.executeUpdate("DELETE FROM employee WHERE id_employee = ?", id);
+                if (ok) {
+                    Action_radio(radio_buttom, g);
+                    clearFields();
+                    ActivityLogger.log("حذف نهائي لموظف", "قام بحذف الموظف نهائياً: " + empName + " (معرف: " + id + ")");
+                    UITheme.showThemedMessage(frame, "تم حذف الموظف \"" + empName + "\" نهائياً من قاعدة البيانات.", "تم الحذف", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        });
+
+        cancelBtn.addActionListener(e -> choiceDialog.dispose());
+
+        btnPanel.add(archiveBtn);
+        btnPanel.add(deleteBtn);
+        btnPanel.add(cancelBtn);
+        choiceDialog.add(btnPanel, BorderLayout.SOUTH);
+        choiceDialog.setVisible(true);
+    }
+
+    /** Shows the archive sub-dialog to pick an exit date and archive the employee. */
+    private void showArchiveDialog(String id, String empName) {
+        JDialog archDialog = new JDialog((Frame) null, "إنهاء مهام الموظف", true);
+        archDialog.setLayout(new BorderLayout());
+        archDialog.setSize(400, 230);
+        archDialog.setLocationRelativeTo(frame);
+        archDialog.setResizable(false);
+        archDialog.getContentPane().setBackground(UITheme.getBgCard());
+
+        JLabel titleLbl = new JLabel("إنهاء مهام: " + empName, SwingConstants.RIGHT);
+        titleLbl.setFont(UITheme.FONT_BOLD);
+        titleLbl.setForeground(UITheme.getTextPrimary());
+        titleLbl.setBorder(new EmptyBorder(16, 16, 6, 16));
+        archDialog.add(titleLbl, BorderLayout.NORTH);
 
         JPanel p = new JPanel(new GridLayout(2, 1, 8, 8));
         p.setBackground(UITheme.getBgCard());
-        p.setBorder(new EmptyBorder(15, 15, 15, 15));
+        p.setBorder(new EmptyBorder(10, 16, 10, 16));
         p.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 
         JLabel lbl = UITheme.createFieldLabel("تاريخ الخروج / إنهاء الخدمة:");
@@ -505,11 +782,17 @@ public class EmployeePanel {
 
         p.add(lbl);
         p.add(exitDateChooser);
+        archDialog.add(p, BorderLayout.CENTER);
 
-        JButton okBtn = UITheme.createDangerButton("تأكيد الإنهاء", null);
-        okBtn.addActionListener(e -> {
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        btnPanel.setBackground(UITheme.getBgCard());
+
+        JButton confirmBtn = UITheme.createButton("تأكيد إنهاء المهام", IconHelper.getIcon("dismissal.png", 16, 16), new Color(245, 158, 11), Color.WHITE);
+        JButton cancelBtn  = UITheme.createSecondaryButton("إلغاء", null);
+
+        confirmBtn.addActionListener(e -> {
             Date exitDate = exitDateChooser.getDate() != null ? exitDateChooser.getDate() : new Date();
-            java.sql.Date sqlExitDate = new java.sql.Date(exitDate.getTime());
+            String sqlExitDate = new SimpleDateFormat("yyyy-MM-dd").format(exitDate);
 
             DBManager.executeUpdate("UPDATE employee SET activ_emp = 0, date_depart = ? WHERE id_employee = ?", sqlExitDate, id);
             DBManager.executeUpdate("UPDATE date_emp SET \"date_départ\" = ? WHERE id_employee = ?", sqlExitDate, id);
@@ -517,17 +800,16 @@ public class EmployeePanel {
             Action_radio(radio_buttom, g);
             clearFields();
             ActivityLogger.log("إنهاء خدمة موظف", "قام بنقل الموظف (معرف: " + id + ") إلى الأرشيف بتاريخ خروج: " + sqlExitDate);
-            dialog.dispose();
-            UITheme.showThemedMessage(frame, "تم تحويل الموظف إلى الأرشيف (موظف سابق) بنجاح!", "تمت العملية", JOptionPane.INFORMATION_MESSAGE);
+            archDialog.dispose();
+            UITheme.showThemedMessage(frame, "تم تحويل الموظف \"" + empName + "\" إلى الأرشيف بنجاح.", "تمت العملية", JOptionPane.INFORMATION_MESSAGE);
         });
 
-        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        btnPanel.setBackground(UITheme.getBgCard());
-        btnPanel.add(okBtn);
+        cancelBtn.addActionListener(e -> archDialog.dispose());
 
-        dialog.add(p, BorderLayout.CENTER);
-        dialog.add(btnPanel, BorderLayout.SOUTH);
-        dialog.setVisible(true);
+        btnPanel.add(confirmBtn);
+        btnPanel.add(cancelBtn);
+        archDialog.add(btnPanel, BorderLayout.SOUTH);
+        archDialog.setVisible(true);
     }
 
     private void clearFields() {

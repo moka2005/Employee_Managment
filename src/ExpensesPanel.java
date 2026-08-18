@@ -59,7 +59,10 @@ public class ExpensesPanel {
         searchBox.setOpaque(false);
         searchBox.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 
-        JLabel searchIcon = UITheme.createFieldLabel("🔍 بحث سريع:");
+        JLabel searchIcon = new JLabel("بحث سريع:", IconHelper.getIcon("search.png", 16, 16), SwingConstants.RIGHT);
+        searchIcon.setFont(UITheme.FONT_BOLD);
+        searchIcon.setForeground(UITheme.getTextPrimary());
+        searchIcon.setHorizontalTextPosition(SwingConstants.LEFT);
         searchField = UITheme.createTextField(15);
         searchField.getDocument().addDocumentListener(new DocumentListener() {
             @Override public void insertUpdate(DocumentEvent e) { applyFilter(); }
@@ -282,11 +285,15 @@ public class ExpensesPanel {
             Date toDate = end_text != null ? end_text.getDate() : null;
 
             while (rs.next()) {
-                java.sql.Date inDate = rs.getDate("input_date");
+                String inDateStr = rs.getString("input_date");
+                if (inDateStr == null || inDateStr.isEmpty()) continue;
                 boolean match = true;
                 if (!showAll) {
-                    if (fromDate != null && inDate.before(fromDate)) match = false;
-                    if (toDate != null && inDate.after(toDate)) match = false;
+                    try {
+                        Date inDate = new SimpleDateFormat("yyyy-MM-dd").parse(inDateStr);
+                        if (fromDate != null && inDate.before(fromDate)) match = false;
+                        if (toDate != null && inDate.after(toDate)) match = false;
+                    } catch (Exception ignored) {}
                 }
 
                 if (match) {
@@ -296,7 +303,7 @@ public class ExpensesPanel {
                     row.add(rs.getString("product_amount"));
                     row.add(rs.getString("product_price") + " DA");
                     row.add(rs.getString("total") + " DA");
-                    row.add(new SimpleDateFormat("yyyy-MM-dd").format(inDate));
+                    row.add(inDateStr);
                     row.add(rs.getString("name_expenses"));
                     row.add(rs.getString("product_id"));
                     model.addRow(row);
@@ -330,7 +337,7 @@ public class ExpensesPanel {
             return;
         }
 
-        java.sql.Date sqlDate = new java.sql.Date(inputDateChooser.getDate().getTime());
+        String sqlDate = new SimpleDateFormat("yyyy-MM-dd").format(inputDateChooser.getDate());
 
         String insertSql = "INSERT INTO expense (product_name, product_amount, product_price, total, input_date, name_expenses) VALUES (?, ?, ?, ?, ?, ?)";
         boolean success = DBManager.executeUpdate(insertSql, name, amount, price, total, sqlDate, resp);

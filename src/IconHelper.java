@@ -35,6 +35,11 @@ public class IconHelper {
         return getIcon(name, -1, -1);
     }
 
+    /** Call this when the theme changes so placeholder icons are regenerated. */
+    public static void clearCache() {
+        iconCache.clear();
+    }
+
     private static ImageIcon loadRawIcon(String name) {
         if (name == null || name.trim().isEmpty()) return null;
 
